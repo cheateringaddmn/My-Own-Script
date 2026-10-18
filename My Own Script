@@ -440,12 +440,12 @@ menuButton("Others","OTHERS",283,"")
 local open = Instance.new("TextButton")
 open.Size = UDim2.fromOffset(270,60)
 open.Position = UDim2.fromOffset(220,55)
-open.BackgroundColor3 = Color3.fromRGB(0, 42, 20)
+open.BackgroundColor3 = Color3.fromRGB(0, 95, 32)
 open.BorderSizePixel = 0
 open.Text = "OPEN WALK SPEED"
-open.TextColor3 = Color3.fromRGB(155, 255, 190)
-open.TextSize = 24
-open.Font = Enum.Font.GothamBold
+open.TextColor3 = Color3.fromRGB(190, 255, 210)
+open.TextSize = 23
+open.Font = Enum.Font.GothamBlack
 open.AutoButtonColor = false
 open.ZIndex = 8
 open.Parent = MainFrame
@@ -457,9 +457,9 @@ openStroke.Transparency = 0
 openStroke.Parent = open
 local openGradient = Instance.new("UIGradient")
 openGradient.Color = ColorSequence.new({
-	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 145, 48)),
-	ColorSequenceKeypoint.new(0.48, Color3.fromRGB(0, 78, 30)),
-	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 35, 17))
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 190, 58)),
+	ColorSequenceKeypoint.new(0.48, Color3.fromRGB(0, 105, 35)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 45, 20))
 })
 openGradient.Rotation = 90
 openGradient.Parent = open
@@ -501,10 +501,10 @@ openFlyToPlayer.Parent = MainFrame
 local openCoord = Instance.new("TextButton")
 openCoord.Size = UDim2.fromOffset(270,50)
 openCoord.Position = UDim2.fromOffset(220,122)
-openCoord.BackgroundColor3 = Color3.fromRGB(0, 42, 20)
+openCoord.BackgroundColor3 = Color3.fromRGB(0, 95, 32)
 openCoord.BorderSizePixel = 0
 openCoord.Text = "OPEN TELEPORT\nWITH COORDINATES"
-openCoord.TextColor3 = Color3.fromRGB(155, 255, 190)
+openCoord.TextColor3 = Color3.fromRGB(190, 255, 210)
 openCoord.TextSize = 24
 openCoord.Font = Enum.Font.Gotham
 openCoord.TextWrapped = true
@@ -538,10 +538,10 @@ local openEmotesR6 = Instance.new("TextButton")
 openEmotesR6.Name = "OpenEmotesR6"
 openEmotesR6.Size = UDim2.fromOffset(270,60)
 openEmotesR6.Position = UDim2.fromOffset(220,55)
-openEmotesR6.BackgroundColor3 = Color3.fromRGB(0, 42, 20)
+openEmotesR6.BackgroundColor3 = Color3.fromRGB(0, 95, 32)
 openEmotesR6.BorderSizePixel = 0
 openEmotesR6.Text = "OPEN EMOTES (R6)"
-openEmotesR6.TextColor3 = Color3.fromRGB(155, 255, 190)
+openEmotesR6.TextColor3 = Color3.fromRGB(190, 255, 210)
 openEmotesR6.TextSize = 24
 openEmotesR6.Font = Enum.Font.Gotham
 openEmotesR6.AutoButtonColor = false
@@ -662,6 +662,25 @@ end
 
 for _, openButton in ipairs({open, open2, openFly, openFlyVehicle, openFlyToPlayer, openCoord, openPlayer, openEmotesR6}) do
     addOpenSideDesign(openButton)
+    openButton.TextColor3 = Color3.fromRGB(190, 255, 210)
+    openButton.TextStrokeColor3 = Color3.fromRGB(0, 55, 20)
+    openButton.TextStrokeTransparency = 0.65
+    openButton.AutoButtonColor = false
+    local stroke = openButton:FindFirstChildOfClass("UIStroke")
+    if stroke then
+        stroke.Color = Color3.fromRGB(0, 255, 85)
+        stroke.Thickness = 2.5
+        stroke.Transparency = 0
+    end
+    local gradient = openButton:FindFirstChildOfClass("UIGradient")
+    if gradient then
+        gradient.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 190, 58)),
+            ColorSequenceKeypoint.new(0.48, Color3.fromRGB(0, 105, 35)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 45, 20))
+        })
+        gradient.Rotation = 90
+    end
 end
 
 --==============================================================
