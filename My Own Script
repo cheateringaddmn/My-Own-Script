@@ -31,8 +31,11 @@ if _G.CheateringaddmnFlyVehicleController then
 end
 
 -- Remove an older copy so the script can be executed again safely.
-local old = PlayerGui:FindFirstChild("CheateringaddmnUI")
-if old then old:Destroy() end
+for _, old in ipairs(PlayerGui:GetChildren()) do
+	if old:IsA("ScreenGui") and old.Name == "CheateringaddmnUI" then
+		old:Destroy()
+	end
+end
 
 local function corner(obj, radius)
 	local c = Instance.new("UICorner")
@@ -111,7 +114,7 @@ ScreenGui.Parent = PlayerGui
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.fromOffset(520,325)
 MainFrame.Position = UDim2.new(.5,-260,.5,-162)
-MainFrame.BackgroundColor3 = Color3.fromRGB(0, 18, 8)
+MainFrame.BackgroundColor3 = Color3.fromRGB(0, 38, 17)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Parent = ScreenGui
@@ -166,9 +169,9 @@ bg.Parent = MainFrame
 corner(bg, 4)
 local bgGradient = Instance.new("UIGradient")
 bgGradient.Color = ColorSequence.new({
-	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 45, 20)),
-	ColorSequenceKeypoint.new(0.48, Color3.fromRGB(0, 28, 13)),
-	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 16, 8))
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 62, 27)),
+	ColorSequenceKeypoint.new(0.48, Color3.fromRGB(0, 39, 19)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 25, 12))
 })
 bgGradient.Rotation = 0
 bgGradient.Parent = bg
@@ -178,7 +181,7 @@ menu.Size = UDim2.fromOffset(190,325)
 menu.BackgroundColor3 = Color3.fromRGB(0, 24, 12)
 menu.BorderSizePixel = 0
 menu.ScrollBarThickness = 0
-menu.CanvasSize = UDim2.fromOffset(0,500)
+menu.CanvasSize = UDim2.fromOffset(0,318)
 menu.Parent = MainFrame
 menu.ClipsDescendants = true
 
@@ -344,7 +347,7 @@ local function menuButton(name,text,y,symbol)
 	b.Name = name
 	b.Size = UDim2.fromOffset(184,35)
 	b.Position = UDim2.fromOffset(0,y)
-	b.BackgroundColor3 = Color3.fromRGB(0, 24, 12)
+	b.BackgroundColor3 = Color3.fromRGB(0, 35, 17)
 	b.BackgroundTransparency = 0.04
 	b.BorderSizePixel = 0
 	b.Text = ""
@@ -355,9 +358,9 @@ local function menuButton(name,text,y,symbol)
 
 	local buttonGradient = Instance.new("UIGradient")
 	buttonGradient.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 55, 25)),
-		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 32, 17)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 20, 10))
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 75, 32)),
+		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 45, 22)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 30, 15))
 	})
 	buttonGradient.Rotation = 0
 	buttonGradient.Parent = b
@@ -386,8 +389,8 @@ local function menuButton(name,text,y,symbol)
 	label.Position = UDim2.fromOffset(42, 0)
 	label.BackgroundTransparency = 1
 	label.Text = text
-	label.TextColor3 = Color3.fromRGB(245, 255, 245)
-	label.TextSize = 15
+	label.TextColor3 = Color3.fromRGB(255, 255, 255)
+	label.TextSize = 16
 	label.Font = Enum.Font.GothamMedium
 	label.TextXAlignment = Enum.TextXAlignment.Left
 	label.TextYAlignment = Enum.TextYAlignment.Center
@@ -600,7 +603,7 @@ end
 -- This preserves each button's click handler, size, position, and callback.
 local openButtonsForBackground = {open, open2, openFly, openFlyVehicle, openFlyToPlayer, openCoord, openPlayer, openEmotesR6}
 for _, button in ipairs(openButtonsForBackground) do
-    button.TextColor3 = Color3.fromRGB(190, 255, 215)
+    button.TextColor3 = Color3.fromRGB(245, 255, 250)
     button.TextTransparency = 0
     button.TextStrokeTransparency = 1
     button.BackgroundTransparency = 1
