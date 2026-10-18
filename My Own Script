@@ -606,14 +606,18 @@ for _, button in ipairs(openButtonsForBackground) do
     button.BackgroundTransparency = 1
 
     local gradient = button:FindFirstChildOfClass("UIGradient")
+    -- IMPORTANT: keep the gradient frame as a SIBLING behind the TextButton.
+    -- Parenting it inside the TextButton can layer it over the label on some
+    -- Roblox UI hierarchies, making the OPEN text disappear entirely.
     local background = Instance.new("Frame")
-    background.Name = "OpenButtonGradientBackground"
-    background.Size = UDim2.fromScale(1, 1)
-    background.Position = UDim2.fromScale(0, 0)
+    background.Name = button.Name .. "GradientBackground"
+    background.Size = button.Size
+    background.Position = button.Position
+    background.AnchorPoint = button.AnchorPoint
     background.BackgroundColor3 = Color3.fromRGB(0, 115, 42)
     background.BorderSizePixel = 0
-    background.ZIndex = button.ZIndex - 1
-    background.Parent = button
+    background.ZIndex = math.max(1, button.ZIndex - 1)
+    background.Parent = button.Parent
     corner(background, 5)
 
     if gradient then
@@ -642,7 +646,7 @@ local function addOpenSideDesign(button)
         holder.Position = position
         holder.BackgroundTransparency = 1
         holder.BorderSizePixel = 0
-        holder.ZIndex = button.ZIndex + 2
+        holder.ZIndex = math.max(1, button.ZIndex - 1)
         holder.Parent = button
 
         for i = 0, 1 do
@@ -672,7 +676,7 @@ local function addOpenSideDesign(button)
         slash.Rotation = rotation
         slash.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
         slash.BorderSizePixel = 0
-        slash.ZIndex = button.ZIndex + 2
+        slash.ZIndex = math.max(1, button.ZIndex - 1)
         slash.Parent = button
         corner(slash, 1)
     end
@@ -688,7 +692,7 @@ local function addOpenSideDesign(button)
     lowerEdge.BackgroundColor3 = Color3.fromRGB(0, 255, 115)
     lowerEdge.BackgroundTransparency = 0.12
     lowerEdge.BorderSizePixel = 0
-    lowerEdge.ZIndex = button.ZIndex + 1
+    lowerEdge.ZIndex = math.max(1, button.ZIndex - 1)
     lowerEdge.Parent = button
 
     -- Keep the label centered between the two matching side designs.
