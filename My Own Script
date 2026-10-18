@@ -1,0 +1,4211 @@
+-- GREEN MENU - REFERENCE NEON ANGULAR UI STYLE (no logo beside the header credit).
+--==============================================================
+-- GREEN MENU UI - REFERENCE STYLE UPDATE (UI styling only; existing sizes and callbacks preserved)
+-- SIZE: 520 x 325 (unchanged)
+-- MAIN LOGO: 65 x 65
+-- WALK SPEED / ESP / TELEPORT / INF JUMP / NO CLIP
+-- EMOTES R6 ADDED
+-- By Cheateringaddmn
+--==============================================================
+
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+
+local createFly
+local createFlyVehicle
+local createFlyToPlayer
+local destroyFly
+
+local Player = Players.LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
+
+-- Clean up a previous Fly Vehicle instance when this full script is re-executed.
+if _G.CheateringaddmnFlyVehicleController then
+	pcall(function()
+		local previous = _G.CheateringaddmnFlyVehicleController
+		if previous.Close then previous.Close() end
+	end)
+	_G.CheateringaddmnFlyVehicleController = nil
+end
+
+-- Remove an older copy so the script can be executed again safely.
+local old = PlayerGui:FindFirstChild("CheateringaddmnUI")
+if old then old:Destroy() end
+
+local function corner(obj, radius)
+	local c = Instance.new("UICorner")
+	c.CornerRadius = UDim.new(0, radius)
+	c.Parent = obj
+	return c
+end
+
+local function circle(obj)
+	local c = Instance.new("UICorner")
+	c.CornerRadius = UDim.new(1,0)
+	c.Parent = obj
+	return c
+end
+
+local function drag(gui)
+	local dragging, start, pos
+
+	gui.InputBegan:Connect(function(i)
+		if i.UserInputType == Enum.UserInputType.MouseButton1
+			or i.UserInputType == Enum.UserInputType.Touch then
+
+			dragging = true
+			start = i.Position
+			pos = gui.Position
+
+			i.Changed:Connect(function()
+				if i.UserInputState == Enum.UserInputState.End then
+					dragging = false
+				end
+			end)
+		end
+	end)
+
+	UIS.InputChanged:Connect(function(i)
+		if dragging and (
+			i.UserInputType == Enum.UserInputType.MouseMovement
+			or i.UserInputType == Enum.UserInputType.Touch
+		) then
+
+			local d = i.Position-start
+
+			gui.Position = UDim2.new(
+				pos.X.Scale,
+				pos.X.Offset+d.X,
+				pos.Y.Scale,
+				pos.Y.Offset+d.Y
+			)
+		end
+	end)
+end
+
+local function flash(b)
+	local oldc = b.BackgroundColor3
+	b.BackgroundColor3 = Color3.fromRGB(70,255,100)
+
+	task.delay(.1,function()
+		if b and b.Parent then
+			b.BackgroundColor3 = oldc
+		end
+	end)
+end
+
+--==============================================================
+-- MAIN GUI
+--==============================================================
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "CheateringaddmnUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.IgnoreGuiInset = true
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.DisplayOrder = 100
+ScreenGui.Parent = PlayerGui
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.fromOffset(520,325)
+MainFrame.Position = UDim2.new(.5,-260,.5,-162)
+MainFrame.BackgroundColor3 = Color3.fromRGB(0, 18, 8)
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Parent = ScreenGui
+corner(MainFrame, 4)
+
+local mainStroke = Instance.new("UIStroke")
+mainStroke.Color = Color3.fromRGB(0, 255, 75)
+mainStroke.Thickness = 3
+mainStroke.Transparency = 0
+mainStroke.Parent = MainFrame
+
+local scale = Instance.new("UIScale")
+scale.Parent = MainFrame
+
+local function updateScale()
+	local cam = Workspace.CurrentCamera
+	if not cam then return end
+
+	local v = cam.ViewportSize
+
+	scale.Scale = math.max(
+		.55,
+		math.min(1,(v.X-10)/520,(v.Y-10)/325)
+	)
+end
+
+-- Safely track the active camera. CurrentCamera can briefly be nil while
+-- the client is starting or switching cameras; avoid stopping the whole UI.
+local cameraViewportConnection
+
+local function watchCurrentCamera()
+	if cameraViewportConnection then
+		cameraViewportConnection:Disconnect()
+		cameraViewportConnection = nil
+	end
+
+	local cam = Workspace.CurrentCamera
+	if cam then
+		updateScale()
+		cameraViewportConnection = cam:GetPropertyChangedSignal("ViewportSize"):Connect(updateScale)
+	end
+end
+
+watchCurrentCamera()
+Workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(watchCurrentCamera)
+
+local bg = Instance.new("Frame")
+bg.Size = UDim2.fromScale(1,1)
+bg.BackgroundColor3 = Color3.fromRGB(0,92,8)
+bg.BorderSizePixel = 0
+bg.Parent = MainFrame
+corner(bg, 4)
+local bgGradient = Instance.new("UIGradient")
+bgGradient.Color = ColorSequence.new({
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 45, 20)),
+	ColorSequenceKeypoint.new(0.48, Color3.fromRGB(0, 28, 13)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 16, 8))
+})
+bgGradient.Rotation = 0
+bgGradient.Parent = bg
+
+local menu = Instance.new("ScrollingFrame")
+menu.Size = UDim2.fromOffset(190,325)
+menu.BackgroundColor3 = Color3.fromRGB(0, 24, 12)
+menu.BorderSizePixel = 0
+menu.ScrollBarThickness = 0
+menu.CanvasSize = UDim2.fromOffset(0,500)
+menu.Parent = MainFrame
+menu.ClipsDescendants = true
+
+local menuGlow = Instance.new("UIStroke")
+menuGlow.Color = Color3.fromRGB(0, 190, 65)
+menuGlow.Thickness = 2.4
+menuGlow.Transparency = 0.05
+menuGlow.Parent = menu
+
+local border = Instance.new("Frame")
+border.Size = UDim2.fromOffset(6,325)
+border.Position = UDim2.fromOffset(184,0)
+border.BackgroundColor3 = Color3.fromRGB(0, 255, 75)
+border.BorderSizePixel = 0
+border.ZIndex = 5
+border.Parent = MainFrame
+
+local top = Instance.new("Frame")
+top.Size = UDim2.new(1,0,0,46)
+top.BackgroundColor3 = Color3.fromRGB(0, 180, 65)
+top.BorderSizePixel = 0
+top.Active = true
+top.ZIndex = 6
+top.Parent = MainFrame
+local topGradient = Instance.new("UIGradient")
+topGradient.Color = ColorSequence.new({
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 110, 35)),
+	ColorSequenceKeypoint.new(0.55, Color3.fromRGB(0, 52, 22)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 22, 12))
+})
+topGradient.Rotation = 0
+topGradient.Parent = top
+local topAccent = Instance.new("Frame")
+topAccent.Name = "TopAccentLine"
+topAccent.Size = UDim2.new(1, 0, 0, 2)
+topAccent.Position = UDim2.new(0, 0, 1, -2)
+topAccent.BackgroundColor3 = Color3.fromRGB(115, 255, 160)
+topAccent.BorderSizePixel = 0
+topAccent.ZIndex = 7
+topAccent.Parent = top
+
+-- Futuristic header slashes; decorative only, no logo beside the credit text.
+local headerSlashes = Instance.new("Frame")
+headerSlashes.Name = "HeaderSlashes"
+headerSlashes.Size = UDim2.fromOffset(74, 30)
+headerSlashes.Position = UDim2.new(1, -145, 0, 6)
+headerSlashes.BackgroundTransparency = 1
+headerSlashes.BorderSizePixel = 0
+headerSlashes.ZIndex = 8
+headerSlashes.Parent = top
+for i = 0, 2 do
+    local slash = Instance.new("Frame")
+    slash.Name = "HeaderSlash" .. (i + 1)
+    slash.Size = UDim2.fromOffset(8, 29)
+    slash.Position = UDim2.fromOffset(i * 20, 0)
+    slash.Rotation = 35
+    slash.BackgroundColor3 = Color3.fromRGB(0, 255, 95)
+    slash.BorderSizePixel = 0
+    slash.ZIndex = 8
+    slash.Parent = headerSlashes
+    corner(slash, 2)
+end
+
+-- Small angular neon corner trims to match the reference panel.
+local function addCornerTrim(name, pos, rotation)
+    local trim = Instance.new("Frame")
+    trim.Name = name
+    trim.Size = UDim2.fromOffset(25, 4)
+    trim.Position = pos
+    trim.Rotation = rotation
+    trim.BackgroundColor3 = Color3.fromRGB(0, 255, 90)
+    trim.BorderSizePixel = 0
+    trim.ZIndex = 9
+    trim.Parent = MainFrame
+    corner(trim, 2)
+end
+addCornerTrim("TopLeftTrim", UDim2.fromOffset(2, 4), 45)
+addCornerTrim("TopRightTrim", UDim2.new(1, -27, 0, 4), -45)
+addCornerTrim("BottomLeftTrim", UDim2.new(0, 2, 1, -8), -45)
+addCornerTrim("BottomRightTrim", UDim2.new(1, -27, 1, -8), 45)
+
+local titleAccent = Instance.new("Frame")
+titleAccent.Name = "TitleAccent"
+titleAccent.Size = UDim2.fromOffset(72, 3)
+titleAccent.Position = UDim2.fromOffset(7, 34)
+titleAccent.BackgroundColor3 = Color3.fromRGB(80, 255, 125)
+titleAccent.BorderSizePixel = 0
+titleAccent.ZIndex = 8
+titleAccent.Parent = top
+corner(titleAccent, 2)
+
+local titleAccent2 = Instance.new("Frame")
+titleAccent2.Name = "TitleAccentDetail"
+titleAccent2.Size = UDim2.fromOffset(20, 3)
+titleAccent2.Position = UDim2.fromOffset(83, 34)
+titleAccent2.BackgroundColor3 = Color3.fromRGB(0, 105, 35)
+titleAccent2.BorderSizePixel = 0
+titleAccent2.ZIndex = 8
+titleAccent2.Parent = top
+corner(titleAccent2, 2)
+
+local credit = Instance.new("TextLabel")
+credit.Size = UDim2.fromOffset(330,40)
+credit.Position = UDim2.fromOffset(22,1)
+credit.BackgroundTransparency = 1
+credit.Text = "By Cheateringaddmn"
+credit.TextColor3 = Color3.fromRGB(245, 255, 245)
+credit.TextSize = 21
+credit.Font = Enum.Font.GothamBlack
+credit.FontFace = Font.new("rbxasset://fonts/families/Arial.json", Enum.FontWeight.Bold, Enum.FontStyle.Italic)
+credit.TextXAlignment = Enum.TextXAlignment.Left
+credit.TextStrokeColor3 = Color3.fromRGB(0, 55, 18)
+credit.TextStrokeTransparency = 0.35
+credit.ZIndex = 7
+credit.Parent = MainFrame
+
+local minus = Instance.new("TextButton")
+minus.Size = UDim2.fromOffset(35,35)
+minus.Position = UDim2.new(1,-76,0,4)
+minus.BackgroundColor3 = Color3.fromRGB(245,0,0)
+minus.Text = "-"
+minus.TextColor3 = Color3.new(1,1,1)
+minus.TextSize = 24
+minus.Font = Enum.Font.GothamBold
+minus.ZIndex = 10
+minus.Parent = MainFrame
+circle(minus)
+
+local close = Instance.new("TextButton")
+close.Size = UDim2.fromOffset(35,35)
+close.Position = UDim2.new(1,-38,0,4)
+close.BackgroundColor3 = Color3.fromRGB(245,0,0)
+close.Text = "X"
+close.TextColor3 = Color3.new(1,1,1)
+close.TextSize = 20
+close.Font = Enum.Font.GothamBold
+close.ZIndex = 10
+close.Parent = MainFrame
+circle(close)
+
+local logo = Instance.new("TextButton")
+logo.Name = "GreenMenuLogo"
+logo.Size = UDim2.fromOffset(190,38)
+logo.Position = UDim2.new(.5,-95,.5,-19)
+logo.BackgroundColor3 = Color3.fromRGB(0, 48, 8)
+logo.BorderSizePixel = 0
+logo.Text = "By Cheateringaddmn"
+logo.TextColor3 = Color3.fromRGB(245, 255, 245)
+logo.TextSize = 15
+logo.Font = Enum.Font.GothamBold
+logo.AutoButtonColor = false
+logo.Visible = false
+logo.ZIndex = 100
+logo.Parent = ScreenGui
+corner(logo, 12)
+local logoStroke = Instance.new("UIStroke")
+logoStroke.Color = Color3.fromRGB(70, 255, 135)
+logoStroke.Thickness = 1.5
+logoStroke.Parent = logo
+
+local function menuButton(name,text,y,symbol)
+	local b = Instance.new("TextButton")
+	b.Name = name
+	b.Size = UDim2.fromOffset(184,35)
+	b.Position = UDim2.fromOffset(0,y)
+	b.BackgroundColor3 = Color3.fromRGB(0, 24, 12)
+	b.BackgroundTransparency = 0.04
+	b.BorderSizePixel = 0
+	b.Text = ""
+	b.AutoButtonColor = false
+	b.ClipsDescendants = true
+	b.Parent = menu
+	corner(b, 10)
+
+	local buttonGradient = Instance.new("UIGradient")
+	buttonGradient.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 55, 25)),
+		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 32, 17)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 20, 10))
+	})
+	buttonGradient.Rotation = 0
+	buttonGradient.Parent = b
+
+	local buttonStroke = Instance.new("UIStroke")
+	buttonStroke.Color = Color3.fromRGB(0, 255, 75)
+	buttonStroke.Thickness = 1.1
+	buttonStroke.Transparency = 0
+	buttonStroke.Parent = b
+
+	-- Thin neon accent at the left edge; keeps the button clean, not blocky.
+	local accent = Instance.new("Frame")
+	accent.Name = "SketchAccent"
+	accent.Size = UDim2.fromOffset(4, 22)
+	accent.Position = UDim2.new(0, 7, 0.5, -11)
+	accent.BackgroundColor3 = Color3.fromRGB(0, 255, 70)
+	accent.BorderSizePixel = 0
+	accent.ZIndex = 3
+	accent.Parent = b
+	corner(accent, 2)
+
+	-- Keep the left navigation rows clean: no extra symbol on their RIGHT edge.
+	local label = Instance.new("TextLabel")
+	label.Name = "MenuText"
+	label.Size = UDim2.new(1, -42, 1, 0)
+	label.Position = UDim2.fromOffset(42, 0)
+	label.BackgroundTransparency = 1
+	label.Text = text
+	label.TextColor3 = Color3.fromRGB(245, 255, 245)
+	label.TextSize = 15
+	label.Font = Enum.Font.GothamMedium
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.TextYAlignment = Enum.TextYAlignment.Center
+	label.TextTruncate = Enum.TextTruncate.AtEnd
+	label.ZIndex = 4
+	label.Parent = b
+
+	local iconLabel = Instance.new("TextLabel")
+	iconLabel.Name = "MenuIcon"
+	iconLabel.Size = UDim2.fromOffset(34, 32)
+	iconLabel.Position = UDim2.fromOffset(5, 1)
+	iconLabel.BackgroundTransparency = 1
+	iconLabel.Text = ""
+	iconLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+	iconLabel.TextStrokeColor3 = Color3.fromRGB(255, 255, 255)
+	iconLabel.TextStrokeTransparency = 1
+	iconLabel.TextSize = 26
+	iconLabel.Font = Enum.Font.GothamBold
+	iconLabel.TextXAlignment = Enum.TextXAlignment.Center
+	iconLabel.TextYAlignment = Enum.TextYAlignment.Center
+	iconLabel.ZIndex = 4
+	iconLabel.Parent = b
+
+	local separator = Instance.new("Frame")
+	separator.Name = "SeparatorLine"
+	separator.Size = UDim2.new(1, -14, 0, 1)
+	separator.Position = UDim2.new(0, 7, 1, -1)
+	separator.BackgroundColor3 = Color3.fromRGB(0, 125, 48)
+	separator.BackgroundTransparency = 0.22
+	separator.BorderSizePixel = 0
+	separator.ZIndex = 3
+	separator.Parent = b
+
+	b.MouseButton1Click:Connect(function()
+		flash(b)
+	end)
+
+	return b
+end
+
+local walkBtn = menuButton("WalkSpeed","WALK SPEED",38,"")
+local espBtn = menuButton("ESPPlayer","ESP PLAYER",73,"")
+local tpBtn = menuButton("Teleport","TELEPORT",108,"")
+local infBtn = menuButton("InfiniteJump","INF JUMP",143,"")
+local noclipBtn = menuButton("NoClip","NO CLIP",178,"")
+local emoteBtn = menuButton("Emote","EMOTE",213,"")
+local flyBtn = menuButton("Fly","FLY",248,"")
+menuButton("Others","OTHERS",283,"")
+
+local open = Instance.new("TextButton")
+open.Size = UDim2.fromOffset(270,60)
+open.Position = UDim2.fromOffset(220,55)
+open.BackgroundColor3 = Color3.fromRGB(0, 42, 20)
+open.BorderSizePixel = 0
+open.Text = "OPEN WALK SPEED"
+open.TextColor3 = Color3.fromRGB(155, 255, 190)
+open.TextSize = 24
+open.Font = Enum.Font.GothamBold
+open.AutoButtonColor = false
+open.ZIndex = 8
+open.Parent = MainFrame
+corner(open, 5)
+local openStroke = Instance.new("UIStroke")
+openStroke.Color = Color3.fromRGB(0, 255, 80)
+openStroke.Thickness = 1.8
+openStroke.Transparency = 0
+openStroke.Parent = open
+local openGradient = Instance.new("UIGradient")
+openGradient.Color = ColorSequence.new({
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 145, 48)),
+	ColorSequenceKeypoint.new(0.48, Color3.fromRGB(0, 78, 30)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 35, 17))
+})
+openGradient.Rotation = 90
+openGradient.Parent = open
+
+local open2 = open:Clone()
+open2.Name = "OpenNoClip"
+open2.Text = "OPEN NO CLIP"
+open2.Visible = false
+open2.ZIndex = 8
+open2.Parent = MainFrame
+
+local openFly = open:Clone()
+openFly.Name = "OpenFly"
+openFly.Text = "OPEN FLY"
+openFly.Visible = false
+openFly.ZIndex = 8
+openFly.Parent = MainFrame
+
+local openFlyVehicle = open:Clone()
+openFlyVehicle.Name = "OpenFlyVehicle"
+openFlyVehicle.Text = "OPEN FLY VEHICLE"
+openFlyVehicle.Size = UDim2.fromOffset(270,50)
+openFlyVehicle.Position = UDim2.fromOffset(220,122)
+openFlyVehicle.TextSize = 22
+openFlyVehicle.Visible = false
+openFlyVehicle.ZIndex = 8
+openFlyVehicle.Parent = MainFrame
+
+local openFlyToPlayer = open:Clone()
+openFlyToPlayer.Name = "OpenFlyToPlayer"
+openFlyToPlayer.Text = "OPEN FLY TO PLAYER"
+openFlyToPlayer.Size = UDim2.fromOffset(270,50)
+openFlyToPlayer.Position = UDim2.fromOffset(220,177)
+openFlyToPlayer.TextSize = 22
+openFlyToPlayer.Visible = false
+openFlyToPlayer.ZIndex = 8
+openFlyToPlayer.Parent = MainFrame
+
+local openCoord = Instance.new("TextButton")
+openCoord.Size = UDim2.fromOffset(270,50)
+openCoord.Position = UDim2.fromOffset(220,122)
+openCoord.BackgroundColor3 = Color3.fromRGB(0, 42, 20)
+openCoord.BorderSizePixel = 0
+openCoord.Text = "OPEN TELEPORT\nWITH COORDINATES"
+openCoord.TextColor3 = Color3.fromRGB(155, 255, 190)
+openCoord.TextSize = 24
+openCoord.Font = Enum.Font.Gotham
+openCoord.TextWrapped = true
+openCoord.Visible = false
+openCoord.AutoButtonColor = false
+openCoord.ZIndex = 8
+openCoord.Parent = MainFrame
+corner(openCoord, 5)
+local coordStroke = Instance.new("UIStroke")
+coordStroke.Color = Color3.fromRGB(0, 255, 80)
+coordStroke.Thickness = 1.8
+coordStroke.Parent = openCoord
+local coordGradient = Instance.new("UIGradient")
+coordGradient.Color = ColorSequence.new({
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 145, 48)),
+	ColorSequenceKeypoint.new(0.48, Color3.fromRGB(0, 78, 30)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 35, 17))
+})
+coordGradient.Rotation = 90
+coordGradient.Parent = openCoord
+
+local openPlayer = openCoord:Clone()
+openPlayer.Name = "OpenTeleportPlayer"
+openPlayer.Text = "OPEN TELEPORT TO PLAYER"
+openPlayer.Position = UDim2.fromOffset(220,177)
+openPlayer.Visible = false
+openPlayer.ZIndex = 8
+openPlayer.Parent = MainFrame
+
+local openEmotesR6 = Instance.new("TextButton")
+openEmotesR6.Name = "OpenEmotesR6"
+openEmotesR6.Size = UDim2.fromOffset(270,60)
+openEmotesR6.Position = UDim2.fromOffset(220,55)
+openEmotesR6.BackgroundColor3 = Color3.fromRGB(0, 42, 20)
+openEmotesR6.BorderSizePixel = 0
+openEmotesR6.Text = "OPEN EMOTES (R6)"
+openEmotesR6.TextColor3 = Color3.fromRGB(155, 255, 190)
+openEmotesR6.TextSize = 24
+openEmotesR6.Font = Enum.Font.Gotham
+openEmotesR6.AutoButtonColor = false
+openEmotesR6.Visible = false
+openEmotesR6.ZIndex = 8
+openEmotesR6.Parent = MainFrame
+corner(openEmotesR6, 5)
+local emoteStroke = Instance.new("UIStroke")
+emoteStroke.Color = Color3.fromRGB(0, 255, 80)
+emoteStroke.Thickness = 1.8
+emoteStroke.Parent = openEmotesR6
+local emoteGradient = Instance.new("UIGradient")
+emoteGradient.Color = ColorSequence.new({
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 145, 48)),
+	ColorSequenceKeypoint.new(0.48, Color3.fromRGB(0, 78, 30)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 35, 17))
+})
+emoteGradient.Rotation = 90
+emoteGradient.Parent = openEmotesR6
+
+-- Clean, high-contrast monochrome icons for the separate OPEN buttons.
+-- These are TextLabels, so they do not replace or intercept button click handlers.
+local function addOpenIcon(button, symbol)
+    local icon = Instance.new("TextLabel")
+    icon.Name = "OpenButtonIcon"
+    icon.Size = UDim2.fromOffset(38, 38)
+    icon.Position = UDim2.new(0, 9, 0.5, -19)
+    icon.BackgroundTransparency = 1
+    icon.BorderSizePixel = 0
+    icon.Text = symbol
+    icon.TextColor3 = Color3.fromRGB(255, 255, 255)
+    icon.TextStrokeColor3 = Color3.fromRGB(255, 255, 255)
+    icon.TextStrokeTransparency = 1
+    icon.TextSize = 29
+    icon.Font = Enum.Font.GothamBold
+    icon.TextXAlignment = Enum.TextXAlignment.Center
+    icon.TextYAlignment = Enum.TextYAlignment.Center
+    icon.ZIndex = button.ZIndex + 1
+    icon.Parent = button
+    -- Keep the icon separate from the text; left padding gives every OPEN label a consistent start.
+    button.TextXAlignment = Enum.TextXAlignment.Left
+    button.Text = "          " .. button.Text
+end
+
+-- addOpenIcon(open, "➤") -- decorative icon removed
+-- addOpenIcon(open2, "⬟") -- decorative icon removed
+-- addOpenIcon(openFly, "✕") -- decorative icon removed
+-- addOpenIcon(openFlyVehicle, "✕") -- decorative icon removed
+-- addOpenIcon(openFlyToPlayer, "✕") -- decorative icon removed
+-- addOpenIcon(openCoord, "●") -- decorative icon removed
+-- addOpenIcon(openPlayer, "●") -- decorative icon removed
+-- addOpenIcon(openEmotesR6, "♫") -- decorative icon removed
+
+-- Add matching neon-green side accents to EVERY OPEN panel.
+-- The accents are decorative only and do not change button positions, sizes, or callbacks.
+local function addOpenSideDesign(button)
+    if not button or button:FindFirstChild("OpenSideDesignLeft") then return end
+
+    local function makeSide(name, position, flip)
+        local holder = Instance.new("Frame")
+        holder.Name = name
+        holder.Size = UDim2.fromOffset(22, 34)
+        holder.Position = position
+        holder.BackgroundTransparency = 1
+        holder.BorderSizePixel = 0
+        holder.ZIndex = button.ZIndex + 2
+        holder.Parent = button
+
+        for i = 0, 1 do
+            local slash = Instance.new("Frame")
+            slash.Name = "NeonSlash" .. (i + 1)
+            slash.Size = UDim2.fromOffset(6, 25)
+            slash.Position = UDim2.fromOffset(i * 9 + (flip and 3 or 0), 4)
+            slash.Rotation = flip and -25 or 25
+            slash.BackgroundColor3 = Color3.fromRGB(0, 255, 105)
+            slash.BackgroundTransparency = 0.05
+            slash.BorderSizePixel = 0
+            slash.ZIndex = holder.ZIndex
+            slash.Parent = holder
+            corner(slash, 2)
+        end
+    end
+
+    makeSide("OpenSideDesignLeft", UDim2.new(0, 10, 0.5, -17), false)
+    makeSide("OpenSideDesignRight", UDim2.new(1, -32, 0.5, -17), true)
+
+    -- Angular corner cuts and bright lower edge, matching the reference panel.
+    local function cornerSlash(name, position, rotation, width)
+        local slash = Instance.new("Frame")
+        slash.Name = name
+        slash.Size = UDim2.fromOffset(width or 15, 3)
+        slash.Position = position
+        slash.Rotation = rotation
+        slash.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
+        slash.BorderSizePixel = 0
+        slash.ZIndex = button.ZIndex + 2
+        slash.Parent = button
+        corner(slash, 1)
+    end
+    cornerSlash("OpenCornerTopLeft", UDim2.fromOffset(2, 5), 42, 13)
+    cornerSlash("OpenCornerTopRight", UDim2.new(1, -15, 0, 5), -42, 13)
+    cornerSlash("OpenCornerBottomLeft", UDim2.new(0, 2, 1, -8), -42, 13)
+    cornerSlash("OpenCornerBottomRight", UDim2.new(1, -15, 1, -8), 42, 13)
+
+    local lowerEdge = Instance.new("Frame")
+    lowerEdge.Name = "OpenNeonLowerEdge"
+    lowerEdge.Size = UDim2.new(0.72, 0, 0, 2)
+    lowerEdge.Position = UDim2.new(0.14, 0, 1, -3)
+    lowerEdge.BackgroundColor3 = Color3.fromRGB(0, 255, 115)
+    lowerEdge.BackgroundTransparency = 0.12
+    lowerEdge.BorderSizePixel = 0
+    lowerEdge.ZIndex = button.ZIndex + 1
+    lowerEdge.Parent = button
+
+    -- Keep the label centered between the two matching side designs.
+    button.TextXAlignment = Enum.TextXAlignment.Center
+end
+
+for _, openButton in ipairs({open, open2, openFly, openFlyVehicle, openFlyToPlayer, openCoord, openPlayer, openEmotesR6}) do
+    addOpenSideDesign(openButton)
+end
+
+--==============================================================
+-- WALK SPEED
+--==============================================================
+
+local speedGui, speedMain, speedLogo
+local savedSpeed = 16
+
+local function destroySpeed()
+	savedSpeed = 16
+
+	local h = Player.Character and Player.Character:FindFirstChildOfClass("Humanoid")
+	if h then
+		h.WalkSpeed = 16
+	end
+
+	if speedGui then
+		speedGui:Destroy()
+	end
+
+	speedGui,speedMain,speedLogo=nil,nil,nil
+end
+
+local function createSpeed()
+	if speedGui then
+		speedGui:Destroy()
+	end
+
+	speedGui=Instance.new("ScreenGui")
+	speedGui.Name="SpeedUI"
+	speedGui.ResetOnSpawn=false
+	speedGui.DisplayOrder=100
+	speedGui.Parent=PlayerGui
+
+	speedMain=Instance.new("Frame")
+	speedMain.Size=UDim2.fromOffset(200,195)
+	speedMain.Position=UDim2.new(.5,-100,.5,-97)
+	speedMain.BackgroundColor3=Color3.fromRGB(10, 88, 34)
+	speedMain.BorderSizePixel=0
+	speedMain.Active=true
+	speedMain.Parent=speedGui
+	corner(speedMain,13)
+
+	local t=Instance.new("TextLabel")
+	t.Size=UDim2.new(1,-70,0,28)
+	t.Position=UDim2.fromOffset(12,8)
+	t.BackgroundTransparency=1
+	t.Text="By Cheateringaddmn"
+	t.TextColor3=Color3.fromRGB(0,255,100)
+	t.TextSize=15
+	t.Font=Enum.Font.GothamBold
+	t.Parent=speedMain
+
+	local m=Instance.new("TextButton")
+	m.Size=UDim2.fromOffset(22,22)
+	m.Position=UDim2.new(1,-52,0,6)
+	m.BackgroundColor3=Color3.fromRGB(18, 112, 44)
+	m.Text=""
+	m.TextColor3=Color3.new(1,1,1)
+	m.Parent=speedMain
+	circle(m)
+
+	local x=m:Clone()
+	x.Position=UDim2.new(1,-27,0,6)
+	x.Text=""
+	x.Parent=speedMain
+
+	local box=Instance.new("TextBox")
+	box.Size=UDim2.fromOffset(165,48)
+	box.Position=UDim2.new(.5,-82,0,43)
+	box.BackgroundColor3=Color3.new(1,1,1)
+	box.TextColor3=Color3.new(0,0,0)
+	box.Text=tostring(savedSpeed)
+	box.TextSize=20
+	box.Font=Enum.Font.GothamBold
+	box.ClearTextOnFocus=false
+	box.Parent=speedMain
+	corner(box,9)
+
+	local apply=Instance.new("TextButton")
+	apply.Size=UDim2.fromOffset(165,43)
+	apply.Position=UDim2.new(.5,-82,0,101)
+	apply.BackgroundColor3=Color3.fromRGB(0,200,80)
+	apply.Text="APPLY"
+	apply.TextColor3=Color3.new(1,1,1)
+	apply.TextSize=17
+	apply.Font=Enum.Font.GothamBold
+	apply.Parent=speedMain
+	corner(apply,9)
+
+	speedLogo=Instance.new("ImageButton")
+	speedLogo.Size=UDim2.fromOffset(50,50)
+	speedLogo.Position=UDim2.new(.5,-25,.5,-25)
+	speedLogo.BackgroundTransparency=1
+	speedLogo.Image="rbxassetid://126155337074689"
+	speedLogo.Visible=false
+	speedLogo.Parent=speedGui
+	circle(speedLogo)
+
+	apply.MouseButton1Click:Connect(function()
+		local n=tonumber(box.Text)
+
+		if n then
+			savedSpeed=n
+
+			local h=Player.Character and Player.Character:FindFirstChildOfClass("Humanoid")
+			if h then
+				h.WalkSpeed=n
+			end
+
+			flash(apply)
+		end
+	end)
+
+	m.MouseButton1Click:Connect(function()
+		speedMain.Visible=false
+		speedLogo.Visible=true
+	end)
+
+	speedLogo.MouseButton1Click:Connect(function()
+		speedMain.Visible=true
+		speedLogo.Visible=false
+	end)
+
+	x.MouseButton1Click:Connect(destroySpeed)
+
+	drag(speedMain)
+	drag(speedLogo)
+end
+
+--==============================================================
+-- INF JUMP
+--==============================================================
+
+local infGui, infMain, infLogo
+local infOn=false
+local jumpPower=nil
+local infJumpConnection
+
+local function destroyInf()
+	infOn=false
+
+	if infJumpConnection then
+		infJumpConnection:Disconnect()
+		infJumpConnection=nil
+	end
+
+	local h=Player.Character and Player.Character:FindFirstChildOfClass("Humanoid")
+
+	if h then
+		h.UseJumpPower=true
+		h.JumpPower=50
+	end
+
+	if infGui then
+		infGui:Destroy()
+	end
+
+	infGui,infMain,infLogo=nil,nil,nil
+	jumpPower=nil
+end
+
+local function createInf()
+	if infGui and infGui.Parent then
+		infMain.Visible=true
+		infLogo.Visible=false
+		return
+	end
+
+	infGui=Instance.new("ScreenGui")
+	infGui.Name="InfJumpUI"
+	infGui.ResetOnSpawn=false
+	infGui.DisplayOrder=130
+	infGui.Parent=PlayerGui
+
+	infMain=Instance.new("Frame")
+	infMain.Size=UDim2.fromOffset(240,165)
+	infMain.Position=UDim2.new(.5,-120,.5,-82)
+	infMain.BackgroundColor3=Color3.fromRGB(0,55,20)
+	infMain.BorderSizePixel=0
+	infMain.Active=true
+	infMain.Parent=infGui
+	corner(infMain,22)
+
+	local st=Instance.new("UIStroke")
+	st.Color=Color3.fromRGB(0,150,55)
+	st.Parent=infMain
+
+	local title=Instance.new("TextLabel")
+	title.Size=UDim2.fromOffset(145,20)
+	title.Position=UDim2.fromOffset(11,3)
+	title.BackgroundTransparency=1
+	title.Text="By Cheateringaddmn"
+	title.TextColor3=Color3.new(1,1,1)
+	title.TextSize=11
+	title.Parent=infMain
+
+	local m=Instance.new("TextButton")
+	m.Size=UDim2.fromOffset(28,28)
+	m.Position=UDim2.new(1,-62,0,-14)
+	m.BackgroundColor3=Color3.fromRGB(245,0,0)
+	m.Text=""
+	m.TextColor3=Color3.new(1,1,1)
+	m.TextSize=19
+	m.ZIndex=10
+	m.Parent=infMain
+	circle(m)
+
+	local x=m:Clone()
+	x.Position=UDim2.new(1,-30,0,-14)
+	x.Text="X"
+	x.Parent=infMain
+
+	local box=Instance.new("TextBox")
+	box.Size=UDim2.fromOffset(210,44)
+	box.Position=UDim2.new(.5,-105,0,28)
+	box.BackgroundColor3=Color3.fromRGB(0,105,35)
+	box.Text=""
+	box.PlaceholderText="Set Jump Power"
+	box.TextColor3=Color3.new(1,1,1)
+	box.TextSize=16
+	box.Font=Enum.Font.Gotham
+	box.ClearTextOnFocus=false
+	box.Parent=infMain
+	corner(box,16)
+
+	local ib=Instance.new("TextButton")
+	ib.Size=UDim2.fromOffset(68,65)
+	ib.Position=UDim2.fromOffset(9,81)
+	ib.BackgroundColor3=Color3.fromRGB(0,105,35)
+	ib.Text="INF Jump (Off)"
+	ib.TextColor3=Color3.new(1,1,1)
+	ib.TextSize=10
+	ib.TextWrapped=true
+	ib.Parent=infMain
+	corner(ib,17)
+
+	local sb=ib:Clone()
+	sb.Position=UDim2.fromOffset(86,81)
+	sb.Text="Stop Jump"
+	sb.Parent=infMain
+
+	local ab=ib:Clone()
+	ab.Position=UDim2.fromOffset(163,81)
+	ab.Text="Apply Jump Power"
+	ab.Parent=infMain
+
+	infLogo=Instance.new("ImageButton")
+	infLogo.Size=UDim2.fromOffset(50,50)
+	infLogo.Position=UDim2.new(.5,-25,.5,-25)
+	infLogo.BackgroundTransparency=1
+	infLogo.Image="rbxassetid://126155337074689"
+	infLogo.Visible=false
+	infLogo.Parent=infGui
+	circle(infLogo)
+
+	ib.MouseButton1Click:Connect(function()
+		infOn=not infOn
+		ib.Text=infOn and "INF Jump (On)" or "INF Jump (Off)"
+		flash(ib)
+	end)
+
+	ab.MouseButton1Click:Connect(function()
+		local s=string.lower(box.Text:gsub("%s+",""))
+		local n
+
+		if s=="inf" or s=="infinity" or s=="+inf"
+			or s=="+infinity" or s=="∞" then
+
+			n=1000000
+		else
+			local level=tonumber(s)
+
+			if level and level>=0 and level==math.floor(level) then
+				n=level*50
+			end
+		end
+
+		if n then
+			jumpPower=n
+
+			local h=Player.Character and Player.Character:FindFirstChildOfClass("Humanoid")
+
+			if h then
+				h.UseJumpPower=true
+				h.JumpPower=n
+			end
+
+			flash(ab)
+		end
+	end)
+
+	sb.MouseButton1Click:Connect(function()
+		local h=Player.Character and Player.Character:FindFirstChildOfClass("Humanoid")
+		local r=Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
+
+		if h and r then
+			r.AssemblyLinearVelocity=Vector3.new(
+				r.AssemblyLinearVelocity.X,
+				0,
+				r.AssemblyLinearVelocity.Z
+			)
+
+			h:ChangeState(Enum.HumanoidStateType.Landed)
+		end
+
+		flash(sb)
+	end)
+
+	infJumpConnection=UIS.JumpRequest:Connect(function()
+		if infOn then
+			local h=Player.Character and Player.Character:FindFirstChildOfClass("Humanoid")
+
+			if h and h.Health>0 then
+				h:ChangeState(Enum.HumanoidStateType.Jumping)
+			end
+		end
+	end)
+
+	m.MouseButton1Click:Connect(function()
+		infMain.Visible=false
+		infLogo.Visible=true
+	end)
+
+	infLogo.MouseButton1Click:Connect(function()
+		infMain.Visible=true
+		infLogo.Visible=false
+	end)
+
+	x.MouseButton1Click:Connect(destroyInf)
+
+	drag(infMain)
+	drag(infLogo)
+end
+
+--==============================================================
+-- NO CLIP
+--==============================================================
+
+local noclipGui
+local noclipMain
+local noclipToggle
+local noclipClose
+local noclipMinus
+local noclipLogo
+local noclipEnabled=false
+local noclipConnection
+local noclipSavedCanCollide={}
+
+local function loadNoClipCharacter()
+	return Player.Character or Player.CharacterAdded:Wait()
+end
+
+local function setNoclip(enabled)
+	noclipEnabled=enabled
+
+	if noclipConnection then
+		noclipConnection:Disconnect()
+		noclipConnection=nil
+	end
+
+	if enabled then
+		table.clear(noclipSavedCanCollide)
+
+		local character=loadNoClipCharacter()
+
+		for _,part in ipairs(character:GetDescendants()) do
+			if part:IsA("BasePart") then
+				noclipSavedCanCollide[part]=part.CanCollide
+				part.CanCollide=false
+			end
+		end
+
+		noclipConnection=RunService.Stepped:Connect(function()
+			if not noclipEnabled then return end
+
+			local characterNow=Player.Character
+			if not characterNow then return end
+
+			for _,part in ipairs(characterNow:GetDescendants()) do
+				if part:IsA("BasePart") then
+					part.CanCollide=false
+				end
+			end
+		end)
+
+		if noclipToggle then
+			noclipToggle.Text="NoClip ON"
+			noclipToggle.BackgroundColor3=Color3.fromRGB(80,255,100)
+		end
+	else
+		for part,original in pairs(noclipSavedCanCollide) do
+			if part and part.Parent then
+				part.CanCollide=original
+			end
+		end
+
+		table.clear(noclipSavedCanCollide)
+
+		if noclipToggle then
+			noclipToggle.Text="NoClip OFF"
+			noclipToggle.BackgroundColor3=Color3.fromRGB(220,50,50)
+		end
+	end
+end
+
+local function destroyNoClip()
+	setNoclip(false)
+
+	if noclipGui then
+		noclipGui:Destroy()
+	end
+
+	noclipGui=nil
+	noclipMain=nil
+	noclipToggle=nil
+	noclipClose=nil
+	noclipMinus=nil
+	noclipLogo=nil
+end
+
+local function createNoClip()
+	if noclipGui and noclipGui.Parent then
+		noclipMain.Visible=true
+		noclipLogo.Visible=false
+		return
+	end
+
+	noclipGui=Instance.new("ScreenGui")
+	noclipGui.Name="NoClipUI"
+	noclipGui.ResetOnSpawn=false
+	noclipGui.IgnoreGuiInset=true
+	noclipGui.DisplayOrder=125
+	noclipGui.Parent=PlayerGui
+
+	noclipMain=Instance.new("Frame")
+	noclipMain.Name="MainFrame"
+	noclipMain.Size=UDim2.fromOffset(150,65)
+	noclipMain.Position=UDim2.new(.5,-75,.5,-32)
+	noclipMain.BackgroundColor3=Color3.fromRGB(12, 96, 38)
+	noclipMain.BorderSizePixel=0
+	noclipMain.Active=true
+	noclipMain.Parent=noclipGui
+	corner(noclipMain,14)
+
+	local creditLabel=Instance.new("TextLabel")
+	creditLabel.Name="CreditLabel"
+	creditLabel.Text="By Cheateringaddmn"
+	creditLabel.Font=Enum.Font.GothamBold
+	creditLabel.TextColor3=Color3.fromRGB(200,200,200)
+	creditLabel.TextSize=9
+	creditLabel.BackgroundTransparency=1
+	creditLabel.Position=UDim2.fromOffset(6,3)
+	creditLabel.Size=UDim2.new(1,-55,0,12)
+	creditLabel.Parent=noclipMain
+
+	noclipMinus=Instance.new("TextButton")
+	noclipMinus.Name="MinimizeBtn"
+	noclipMinus.Size=UDim2.fromOffset(20,20)
+	noclipMinus.Position=UDim2.new(1,-44,0,2)
+	noclipMinus.BackgroundTransparency=1
+	noclipMinus.Text=""
+	noclipMinus.Font=Enum.Font.GothamBold
+	noclipMinus.TextColor3=Color3.fromRGB(255,80,80)
+	noclipMinus.TextSize=18
+	noclipMinus.AutoButtonColor=false
+	noclipMinus.Parent=noclipMain
+
+	noclipClose=Instance.new("TextButton")
+	noclipClose.Name="CloseBtn"
+	noclipClose.Size=UDim2.fromOffset(20,20)
+	noclipClose.Position=UDim2.new(1,-23,0,2)
+	noclipClose.BackgroundTransparency=1
+	noclipClose.Text=""
+	noclipClose.Font=Enum.Font.GothamBold
+	noclipClose.TextColor3=Color3.fromRGB(255,80,80)
+	noclipClose.TextSize=20
+	noclipClose.AutoButtonColor=false
+	noclipClose.Parent=noclipMain
+
+	noclipToggle=Instance.new("TextButton")
+	noclipToggle.Name="ToggleBtn"
+	noclipToggle.Size=UDim2.new(1,-12,0,38)
+	noclipToggle.Position=UDim2.fromOffset(6,20)
+	noclipToggle.BackgroundColor3=Color3.fromRGB(220,50,50)
+	noclipToggle.Text="NoClip OFF"
+	noclipToggle.Font=Enum.Font.GothamBold
+	noclipToggle.TextColor3=Color3.fromRGB(255,255,255)
+	noclipToggle.TextSize=17
+	noclipToggle.AutoLocalize=false
+	noclipToggle.Parent=noclipMain
+	corner(noclipToggle,11)
+
+	noclipLogo=Instance.new("ImageButton")
+	noclipLogo.Name="NoClipLogo"
+	noclipLogo.Size=UDim2.fromOffset(50,50)
+	noclipLogo.Position=UDim2.new(.5,-25,.5,-25)
+	noclipLogo.BackgroundTransparency=1
+	noclipLogo.BorderSizePixel=0
+	noclipLogo.Image="rbxassetid://126155337074689"
+	noclipLogo.Visible=false
+	noclipLogo.ZIndex=100
+	noclipLogo.Parent=noclipGui
+	circle(noclipLogo)
+
+	noclipToggle.MouseButton1Click:Connect(function()
+		setNoclip(not noclipEnabled)
+	end)
+
+	noclipMinus.MouseButton1Click:Connect(function()
+		noclipMain.Visible=false
+		noclipLogo.Visible=true
+	end)
+
+	noclipLogo.MouseButton1Click:Connect(function()
+		noclipMain.Visible=true
+		noclipLogo.Visible=false
+	end)
+
+	noclipClose.MouseButton1Click:Connect(function()
+		destroyNoClip()
+	end)
+
+	drag(noclipMain)
+	drag(noclipLogo)
+
+	Player.CharacterAdded:Connect(function()
+		task.wait(.1)
+
+		if noclipEnabled and noclipGui and noclipGui.Parent then
+			setNoclip(true)
+		end
+	end)
+end
+
+--==============================================================
+-- ESP PLAYER
+--==============================================================
+
+local espGui,espMain,espLogo
+local espOn=false
+local espNameEnabled=true
+local espDistanceEnabled=true
+local espMode="Box"
+local espColor=Color3.fromRGB(255,0,0)
+local espDestroyed=false
+local espObjects={}
+
+local function clearESP(p)
+	local d=espObjects[p]
+
+	if d then
+		for _,v in pairs(d) do
+			if typeof(v)=="Instance" and v.Parent then
+				v:Destroy()
+			end
+		end
+
+		espObjects[p]=nil
+	end
+end
+
+local function makeESP(p)
+	if p==Player or espDestroyed or not p.Character then
+		return
+	end
+
+	local c=p.Character
+	local root=c:FindFirstChild("HumanoidRootPart")
+
+	if not root then
+		return
+	end
+
+	clearESP(p)
+
+	local h=Instance.new("Highlight")
+	h.Name="MiniESP_Highlight"
+	h.Adornee=c
+	h.FillColor=espColor
+	h.OutlineColor=espColor
+	h.FillTransparency=.75
+	h.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop
+	h.Enabled=false
+	h.Parent=c
+
+	local box=Instance.new("BoxHandleAdornment")
+	box.Name="MiniESP_Box"
+	box.Adornee=root
+	box.Size=Vector3.new(4,6,2)
+	box.Color3=espColor
+	box.Transparency=.35
+	box.AlwaysOnTop=true
+	box.ZIndex=100
+	box.Visible=false
+	box.Parent=root
+
+	local billboard=Instance.new("BillboardGui")
+	billboard.Name="MiniESP_Info"
+	billboard.Adornee=root
+	billboard.Size=UDim2.fromOffset(300,50)
+	billboard.StudsOffset=Vector3.new(0,3.5,0)
+	billboard.AlwaysOnTop=true
+	billboard.Enabled=false
+	billboard.Parent=root
+
+	local label=Instance.new("TextLabel")
+	label.Size=UDim2.fromScale(1,1)
+	label.BackgroundTransparency=1
+	label.TextSize=13
+	label.TextColor3=espColor
+	label.TextStrokeTransparency=0
+	label.TextStrokeColor3=Color3.new(0,0,0)
+	label.Font=Enum.Font.GothamBold
+	label.TextWrapped=true
+	label.Parent=billboard
+
+	espObjects[p]={
+		Highlight=h,
+		Box=box,
+		Billboard=billboard,
+		Label=label
+	}
+end
+
+local function createESP()
+	if espGui and espGui.Parent then
+		espMain.Visible=true
+		espLogo.Visible=false
+		return
+	end
+
+	espDestroyed=false
+
+	espGui=Instance.new("ScreenGui")
+	espGui.Name="MiniESP"
+	espGui.ResetOnSpawn=false
+	espGui.IgnoreGuiInset=true
+	espGui.DisplayOrder=105
+	espGui.Parent=PlayerGui
+
+	espMain=Instance.new("Frame")
+	espMain.Size=UDim2.fromOffset(230,215)
+	espMain.Position=UDim2.new(0,20,0,120)
+	espMain.BackgroundColor3=Color3.fromRGB(10, 88, 34)
+	espMain.BorderSizePixel=0
+	espMain.Active=true
+	espMain.Parent=espGui
+	corner(espMain,12)
+
+	local title=Instance.new("TextLabel")
+	title.Size=UDim2.new(1,-75,0,25)
+	title.Position=UDim2.fromOffset(10,5)
+	title.BackgroundTransparency=1
+	title.Text="By Cheateringaddmn"
+	title.TextColor3=Color3.fromRGB(0,255,100)
+	title.TextSize=15
+	title.Font=Enum.Font.GothamBold
+	title.Parent=espMain
+
+	local eb=Instance.new("TextButton")
+	eb.Size=UDim2.fromOffset(100,36)
+	eb.Position=UDim2.fromOffset(10,36)
+	eb.BackgroundColor3=Color3.fromRGB(200,50,50)
+	eb.Text="ESP: OFF"
+	eb.TextColor3=Color3.new(1,1,1)
+	eb.TextSize=14
+	eb.Font=Enum.Font.GothamBold
+	eb.Parent=espMain
+
+	local nb=eb:Clone()
+	nb.Position=UDim2.fromOffset(120,36)
+	nb.Text="NAME: ON"
+	nb.BackgroundColor3=Color3.fromRGB(0,180,70)
+	nb.Parent=espMain
+
+	local db=eb:Clone()
+	db.Position=UDim2.fromOffset(10,79)
+	db.Text="DIST: ON"
+	db.BackgroundColor3=Color3.fromRGB(0,180,70)
+	db.Parent=espMain
+
+	local mb=eb:Clone()
+	mb.Position=UDim2.fromOffset(120,79)
+	mb.Text="MODE: BOX"
+	mb.BackgroundColor3=Color3.fromRGB(0,120,200)
+	mb.Parent=espMain
+
+	local cb=eb:Clone()
+	cb.Size=UDim2.fromOffset(210,36)
+	cb.Position=UDim2.fromOffset(10,122)
+	cb.Text="COLOR: RED"
+	cb.BackgroundColor3=espColor
+	cb.Parent=espMain
+
+	local colorPicker=Instance.new("Frame")
+	colorPicker.Size=UDim2.fromOffset(210,58)
+	colorPicker.Position=UDim2.fromOffset(10,122)
+	colorPicker.BackgroundColor3=Color3.fromRGB(10, 88, 34)
+	colorPicker.BorderSizePixel=0
+	colorPicker.Visible=false
+	colorPicker.ZIndex=20
+	colorPicker.Parent=espMain
+	corner(colorPicker,7)
+
+	local choices={
+		{"RED",Color3.fromRGB(255,0,0)},
+		{"ORANGE",Color3.fromRGB(255,140,0)},
+		{"YELLOW",Color3.fromRGB(255,255,0)},
+		{"GREEN",Color3.fromRGB(0,255,0)},
+		{"BLUE",Color3.fromRGB(0,170,255)},
+		{"PURPLE",Color3.fromRGB(170,0,255)},
+		{"PINK",Color3.fromRGB(255,80,180)},
+		{"WHITE",Color3.fromRGB(255,255,255)}
+	}
+
+	for i,data in ipairs(choices) do
+		local row=math.floor((i-1)/4)
+		local col=(i-1)%4
+
+		local b=Instance.new("TextButton")
+		b.Size=UDim2.fromOffset(45,22)
+		b.Position=UDim2.fromOffset(5+col*50,5+row*27)
+		b.BackgroundColor3=data[2]
+		b.BorderSizePixel=0
+		b.Text=""
+		b.AutoButtonColor=false
+		b.ZIndex=21
+		b.Parent=colorPicker
+		corner(b,4)
+
+		b.MouseButton1Click:Connect(function()
+			espColor=data[2]
+			cb.Text="COLOR: "..data[1]
+			cb.BackgroundColor3=data[2]
+			colorPicker.Visible=false
+		end)
+	end
+
+	local mm=Instance.new("TextButton")
+	mm.Size=UDim2.fromOffset(25,25)
+	mm.Position=UDim2.new(1,-58,0,4)
+	mm.BackgroundColor3=Color3.fromRGB(50,50,50)
+	mm.Text=""
+	mm.TextColor3=Color3.new(1,1,1)
+	mm.TextSize=19
+	mm.Font=Enum.Font.GothamBold
+	mm.Parent=espMain
+	circle(mm)
+
+	local xx=mm:Clone()
+	xx.Position=UDim2.new(1,-29,0,4)
+	xx.Text=""
+	xx.Parent=espMain
+
+	espLogo=Instance.new("ImageButton")
+	espLogo.Size=UDim2.fromOffset(50,50)
+	espLogo.Position=UDim2.fromOffset(20,280)
+	espLogo.BackgroundTransparency=1
+	espLogo.BorderSizePixel=0
+	espLogo.Image="rbxassetid://126155337074689"
+	espLogo.ScaleType=Enum.ScaleType.Fit
+	espLogo.Visible=false
+	espLogo.Active=true
+	espLogo.AutoButtonColor=false
+	espLogo.Parent=espGui
+	circle(espLogo)
+
+	local function updateESP()
+		for p,d in pairs(espObjects) do
+			if not p.Parent then
+				clearESP(p)
+				continue
+			end
+
+			local c=p.Character
+			local root=c and c:FindFirstChild("HumanoidRootPart")
+
+			if not espOn or not root then
+				d.Box.Visible=false
+				d.Highlight.Enabled=false
+				d.Billboard.Enabled=false
+			else
+				d.Box.Color3=espColor
+				d.Highlight.FillColor=espColor
+				d.Highlight.OutlineColor=espColor
+				d.Label.TextColor3=espColor
+
+				if espMode=="Box" then
+					d.Box.Visible=true
+					d.Highlight.Enabled=false
+				else
+					d.Box.Visible=false
+					d.Highlight.Enabled=true
+				end
+
+				local text=""
+
+				if espNameEnabled then
+					text=p.Name
+				end
+
+				if espDistanceEnabled then
+					local my=Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
+
+					if my then
+						local dist=math.floor((my.Position-root.Position).Magnitude)
+
+						if text~="" then
+							text=text.."\n"
+						end
+
+						text=text..dist.." studs"
+					end
+				end
+
+				d.Label.Text=text
+				d.Billboard.Enabled=espNameEnabled or espDistanceEnabled
+			end
+		end
+	end
+
+	eb.MouseButton1Click:Connect(function()
+		espOn=not espOn
+		eb.Text=espOn and "ESP: ON" or "ESP: OFF"
+		eb.BackgroundColor3=espOn
+			and Color3.fromRGB(0,200,80)
+			or Color3.fromRGB(200,50,50)
+
+		if espOn then
+			for _,p in ipairs(Players:GetPlayers()) do
+				if p~=Player then
+					makeESP(p)
+				end
+			end
+		end
+	end)
+
+	nb.MouseButton1Click:Connect(function()
+		espNameEnabled=not espNameEnabled
+		nb.Text=espNameEnabled and "NAME: ON" or "NAME: OFF"
+	end)
+
+	db.MouseButton1Click:Connect(function()
+		espDistanceEnabled=not espDistanceEnabled
+		db.Text=espDistanceEnabled and "DIST: ON" or "DIST: OFF"
+	end)
+
+	mb.MouseButton1Click:Connect(function()
+		espMode=espMode=="Box" and "Light" or "Box"
+		mb.Text="MODE: "..string.upper(espMode)
+	end)
+
+	cb.MouseButton1Click:Connect(function()
+		colorPicker.Visible=not colorPicker.Visible
+	end)
+
+	mm.MouseButton1Click:Connect(function()
+		colorPicker.Visible=false
+		espMain.Visible=false
+		espLogo.Visible=true
+	end)
+
+	espLogo.MouseButton1Click:Connect(function()
+		espMain.Visible=true
+		espLogo.Visible=false
+	end)
+
+	xx.MouseButton1Click:Connect(function()
+		espDestroyed=true
+		espOn=false
+
+		for p in pairs(espObjects) do
+			clearESP(p)
+		end
+
+		if espGui then
+			espGui:Destroy()
+		end
+
+		espGui,espMain,espLogo=nil,nil,nil
+	end)
+
+	drag(espMain)
+	drag(espLogo)
+
+	for _,p in ipairs(Players:GetPlayers()) do
+		if p~=Player then
+			p.CharacterAdded:Connect(function()
+				task.wait(.2)
+
+				if espOn and not espDestroyed then
+					makeESP(p)
+				end
+			end)
+		end
+	end
+
+	Players.PlayerAdded:Connect(function(p)
+		p.CharacterAdded:Connect(function()
+			task.wait(.2)
+
+			if espOn and not espDestroyed then
+				makeESP(p)
+			end
+		end)
+	end)
+
+	Players.PlayerRemoving:Connect(clearESP)
+
+	RunService.RenderStepped:Connect(function()
+		if not espDestroyed then
+			updateESP()
+		end
+	end)
+
+	for _,p in ipairs(Players:GetPlayers()) do
+		if p~=Player then
+			makeESP(p)
+		end
+	end
+end
+
+--==============================================================
+-- TELEPORT COORDINATES
+--==============================================================
+
+local tpGui,tpMain,tpLogo,savedPos
+local tpAuto=false
+local tpAutoConnection=nil
+
+local function destroyCoordinates()
+	tpAuto=false
+
+	if tpAutoConnection then
+		tpAutoConnection:Disconnect()
+		tpAutoConnection=nil
+	end
+
+	if tpGui then
+		tpGui:Destroy()
+	end
+
+	tpGui,tpMain,tpLogo=nil,nil,nil
+	savedPos=nil
+end
+
+local function createCoordinates()
+	if tpGui and tpGui.Parent then
+		tpMain.Visible=true
+		tpLogo.Visible=false
+		return
+	end
+
+	tpGui=Instance.new("ScreenGui")
+	tpGui.Name="TeleportGui"
+	tpGui.ResetOnSpawn=false
+	tpGui.IgnoreGuiInset=true
+	tpGui.DisplayOrder=110
+	tpGui.Parent=PlayerGui
+
+	tpLogo=Instance.new("ImageButton")
+	tpLogo.Size=UDim2.fromOffset(40,40)
+	tpLogo.Position=UDim2.new(0,6,.5,-20)
+	tpLogo.BackgroundTransparency=1
+	tpLogo.BorderSizePixel=0
+	tpLogo.Image="rbxassetid://126155337074689"
+	tpLogo.ScaleType=Enum.ScaleType.Fit
+	tpLogo.Visible=false
+	tpLogo.Active=true
+	tpLogo.Parent=tpGui
+	circle(tpLogo)
+
+	tpMain=Instance.new("Frame")
+	tpMain.Size=UDim2.fromOffset(190,205)
+	tpMain.Position=UDim2.new(.5,-95,.5,-102)
+	tpMain.BackgroundColor3=Color3.fromRGB(8,35,18)
+	tpMain.BorderSizePixel=0
+	tpMain.Active=true
+	tpMain.Parent=tpGui
+	corner(tpMain,7)
+
+	local title=Instance.new("TextLabel")
+	title.Size=UDim2.new(1,-52,0,27)
+	title.BackgroundColor3=Color3.fromRGB(0,110,45)
+	title.Text="By Cheateringaddmn"
+	title.TextColor3=Color3.new(1,1,1)
+	title.TextSize=12
+	title.Font=Enum.Font.GothamBold
+	title.BorderSizePixel=0
+	title.Parent=tpMain
+
+	local min=Instance.new("TextButton")
+	min.Size=UDim2.fromOffset(23,23)
+	min.Position=UDim2.new(1,-51,0,2)
+	min.BackgroundColor3=Color3.fromRGB(170,50,50)
+	min.Text=""
+	min.TextColor3=Color3.new(1,1,1)
+	min.TextSize=15
+	min.Font=Enum.Font.GothamBold
+	min.Parent=tpMain
+	circle(min)
+
+	local x=Instance.new("TextButton")
+	x.Size=UDim2.fromOffset(23,23)
+	x.Position=UDim2.new(1,-26,0,2)
+	x.BackgroundColor3=Color3.fromRGB(170,50,50)
+	x.Text="X"
+	x.TextColor3=Color3.new(1,1,1)
+	x.TextSize=13
+	x.Font=Enum.Font.GothamBold
+	x.Parent=tpMain
+	circle(x)
+
+	local box=Instance.new("TextBox")
+	box.Size=UDim2.new(1,-12,0,27)
+	box.Position=UDim2.fromOffset(6,32)
+	box.BackgroundColor3=Color3.fromRGB(12,55,28)
+	box.Text=""
+	box.PlaceholderText="X, Y, Z"
+	box.TextColor3=Color3.new(1,1,1)
+	box.PlaceholderColor3=Color3.fromRGB(150,200,160)
+	box.TextSize=10
+	box.Font=Enum.Font.Gotham
+	box.ClearTextOnFocus=false
+	box.BorderSizePixel=0
+	box.Parent=tpMain
+	corner(box,5)
+
+	local status=Instance.new("TextLabel")
+	status.Size=UDim2.new(1,-12,0,21)
+	status.Position=UDim2.fromOffset(6,62)
+	status.BackgroundColor3=Color3.fromRGB(12,55,28)
+	status.Text="No coordinates"
+	status.TextColor3=Color3.fromRGB(210,255,220)
+	status.TextSize=8
+	status.Font=Enum.Font.Gotham
+	status.BorderSizePixel=0
+	status.Parent=tpMain
+	corner(status,5)
+
+	local function button(text,y,w,xpos)
+		local b=Instance.new("TextButton")
+		b.Size=UDim2.fromOffset(w or 178,25)
+		b.Position=UDim2.fromOffset(xpos or 6,y)
+		b.BackgroundColor3=Color3.fromRGB(0,175,65)
+		b.Text=text
+		b.TextColor3=Color3.new(1,1,1)
+		b.TextSize=9
+		b.Font=Enum.Font.GothamBold
+		b.BorderSizePixel=0
+		b.Parent=tpMain
+		corner(b,5)
+		return b
+	end
+
+	local save=button("SAVE",88,86,6)
+	local copy=button("COPY",88,86,98)
+	local tele=button("TELEPORT",118,178,6)
+	local auto=button("AUTO TELEPORT: OFF",147,178,6)
+	local clear=button("CLEAR",177,178,6)
+
+	local function getPosition()
+		local a,b,c=box.Text:match("([%-%.%d]+)%s*,%s*([%-%.%d]+)%s*,%s*([%-%.%d]+)")
+
+		if a and b and c then
+			return Vector3.new(
+				tonumber(a),
+				tonumber(b),
+				tonumber(c)
+			)
+		end
+	end
+
+	local function teleportCharacter()
+		if not savedPos then
+			return false
+		end
+
+		local r=Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
+
+		if r then
+			r.CFrame=CFrame.new(savedPos+Vector3.new(0,3,0))
+			r.AssemblyLinearVelocity=Vector3.zero
+			r.AssemblyAngularVelocity=Vector3.zero
+			return true
+		end
+
+		return false
+	end
+
+	save.MouseButton1Click:Connect(function()
+		local r=Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
+
+		if r then
+			savedPos=r.Position
+			box.Text=string.format(
+				"%.1f, %.1f, %.1f",
+				r.Position.X,
+				r.Position.Y,
+				r.Position.Z
+			)
+			status.Text="Saved!"
+		else
+			status.Text="Character not found"
+		end
+	end)
+
+	box.FocusLost:Connect(function()
+		local pos=getPosition()
+
+		if pos then
+			savedPos=pos
+			status.Text="Loaded!"
+		else
+			status.Text="Format: X, Y, Z"
+		end
+	end)
+
+	tele.MouseButton1Click:Connect(function()
+		local pos=getPosition()
+
+		if pos then
+			savedPos=pos
+		end
+
+		if not savedPos then
+			status.Text="No coordinates!"
+			return
+		end
+
+		status.Text=teleportCharacter()
+			and "Teleported!"
+			or "Character not found"
+	end)
+
+	auto.MouseButton1Click:Connect(function()
+		tpAuto=not tpAuto
+
+		if tpAuto then
+			if not savedPos then
+				savedPos=getPosition()
+			end
+
+			if not savedPos then
+				tpAuto=false
+				status.Text="No coordinates!"
+				return
+			end
+
+			auto.Text="AUTO TELEPORT: ON"
+			auto.BackgroundColor3=Color3.fromRGB(0,220,80)
+			status.Text="Auto teleport ON"
+
+			if tpAutoConnection then
+				tpAutoConnection:Disconnect()
+			end
+
+			tpAutoConnection=RunService.RenderStepped:Connect(function()
+				if tpAuto then
+					teleportCharacter()
+				end
+			end)
+		else
+			if tpAutoConnection then
+				tpAutoConnection:Disconnect()
+				tpAutoConnection=nil
+			end
+
+			auto.Text="AUTO TELEPORT: OFF"
+			auto.BackgroundColor3=Color3.fromRGB(0,175,65)
+			status.Text="Auto teleport OFF"
+		end
+	end)
+
+	copy.MouseButton1Click:Connect(function()
+		local pos=getPosition()
+
+		if pos then
+			savedPos=pos
+		end
+
+		if not savedPos then
+			status.Text="No coordinates!"
+			return
+		end
+
+		local text=string.format(
+			"%.1f, %.1f, %.1f",
+			savedPos.X,
+			savedPos.Y,
+			savedPos.Z
+		)
+
+		if setclipboard then
+			setclipboard(text)
+			status.Text="Copied!"
+		else
+			box.Text=text
+			status.Text="Copy manually"
+		end
+	end)
+
+	clear.MouseButton1Click:Connect(function()
+		tpAuto=false
+
+		if tpAutoConnection then
+			tpAutoConnection:Disconnect()
+			tpAutoConnection=nil
+		end
+
+		savedPos=nil
+		box.Text=""
+		auto.Text="AUTO TELEPORT: OFF"
+		auto.BackgroundColor3=Color3.fromRGB(0,175,65)
+		status.Text="No coordinates"
+	end)
+
+	min.MouseButton1Click:Connect(function()
+		tpMain.Visible=false
+		tpLogo.Visible=true
+	end)
+
+	tpLogo.MouseButton1Click:Connect(function()
+		tpMain.Visible=true
+		tpLogo.Visible=false
+	end)
+
+	x.MouseButton1Click:Connect(destroyCoordinates)
+
+	drag(tpMain)
+	drag(tpLogo)
+end
+
+--==============================================================
+-- FLY TO PLAYER GUI (STUDIO GAME)
+-- TELEPORT BUTTON REMOVED; FLY PLAYER BUTTON KEPT
+--==============================================================
+
+local playerTpGui,playerTpMain,playerTpLogo
+local selectedTeleportPlayer=nil
+local playerTpFlyConnection=nil
+local playerTpFlying=false
+local playerTpSavedAutoRotate=nil
+
+local function stopPlayerFollow()
+	playerTpFlying=false
+	if playerTpFlyConnection then
+		playerTpFlyConnection:Disconnect()
+		playerTpFlyConnection=nil
+	end
+	local character=Player.Character
+	local humanoid=character and character:FindFirstChildOfClass("Humanoid")
+	if humanoid and playerTpSavedAutoRotate~=nil then
+		humanoid.AutoRotate=playerTpSavedAutoRotate
+	end
+	playerTpSavedAutoRotate=nil
+	if playerTpMain and playerTpMain.Parent then
+		local button=playerTpMain:FindFirstChild("FlyPlayerButton")
+		if button then
+			button.Text="FLY PLAYER"
+			button.BackgroundColor3=Color3.fromRGB(0,145,60)
+		end
+	end
+end
+
+local function destroyTeleportPlayer()
+	stopPlayerFollow()
+	if playerTpGui then
+		playerTpGui:Destroy()
+	end
+	playerTpGui,playerTpMain,playerTpLogo=nil,nil,nil
+	selectedTeleportPlayer=nil
+end
+
+createFlyToPlayer = function()
+	if playerTpGui and playerTpGui.Parent then
+		playerTpMain.Visible=true
+		playerTpLogo.Visible=false
+		return
+	end
+
+	playerTpGui=Instance.new("ScreenGui")
+	playerTpGui.Name="TeleportPlayerUI"
+	playerTpGui.ResetOnSpawn=false
+	playerTpGui.IgnoreGuiInset=true
+	playerTpGui.DisplayOrder=120
+	playerTpGui.Parent=PlayerGui
+
+	playerTpMain=Instance.new("Frame")
+	playerTpMain.Size=UDim2.fromOffset(185,185)
+	playerTpMain.Position=UDim2.new(.5,-92,.5,-92)
+	playerTpMain.BackgroundColor3=Color3.fromRGB(10,92,35)
+	playerTpMain.BorderSizePixel=0
+	playerTpMain.Active=true
+	playerTpMain.Parent=playerTpGui
+	corner(playerTpMain,8)
+
+	local stroke=Instance.new("UIStroke")
+	stroke.Color=Color3.fromRGB(0,200,70)
+	stroke.Thickness=1
+	stroke.Parent=playerTpMain
+
+	local title=Instance.new("TextLabel")
+	title.Size=UDim2.new(1,-55,0,28)
+	title.Position=UDim2.fromOffset(8,0)
+	title.BackgroundTransparency=1
+	title.Text="By Cheateringaddmn"
+	title.TextColor3=Color3.fromRGB(100,255,130)
+	title.TextSize=12
+	title.Font=Enum.Font.GothamBold
+	title.TextXAlignment=Enum.TextXAlignment.Left
+	title.Parent=playerTpMain
+
+	local min=Instance.new("TextButton")
+	min.Size=UDim2.fromOffset(20,20)
+	min.Position=UDim2.new(1,-43,0,4)
+	min.BackgroundColor3=Color3.fromRGB(15,70,35)
+	min.Text=""
+	min.TextColor3=Color3.fromRGB(150,255,170)
+	min.TextSize=14
+	min.Font=Enum.Font.GothamBold
+	min.Parent=playerTpMain
+	corner(min,5)
+
+	local x=Instance.new("TextButton")
+	x.Size=UDim2.fromOffset(20,20)
+	x.Position=UDim2.new(1,-21,0,4)
+	x.BackgroundColor3=Color3.fromRGB(70,20,20)
+	x.Text="X"
+	x.TextColor3=Color3.fromRGB(255,120,120)
+	x.TextSize=11
+	x.Font=Enum.Font.GothamBold
+	x.Parent=playerTpMain
+	corner(x,5)
+
+	local search=Instance.new("TextBox")
+	search.Size=UDim2.new(1,-16,0,22)
+	search.Position=UDim2.fromOffset(8,30)
+	search.BackgroundColor3=Color3.fromRGB(12,50,25)
+	search.BorderSizePixel=0
+	search.PlaceholderText="Search player..."
+	search.PlaceholderColor3=Color3.fromRGB(130,170,140)
+	search.Text=""
+	search.TextColor3=Color3.fromRGB(220,255,225)
+	search.TextSize=10
+	search.Font=Enum.Font.Gotham
+	search.ClearTextOnFocus=false
+	search.Parent=playerTpMain
+	corner(search,5)
+
+	local list=Instance.new("ScrollingFrame")
+	list.Size=UDim2.new(1,-16,0,65)
+	list.Position=UDim2.fromOffset(8,56)
+	list.BackgroundColor3=Color3.fromRGB(6,28,14)
+	list.BorderSizePixel=0
+	list.ScrollBarThickness=3
+	list.CanvasSize=UDim2.new(0,0,0,0)
+	list.Parent=playerTpMain
+	corner(list,5)
+
+	local layout=Instance.new("UIListLayout")
+	layout.Padding=UDim.new(0,2)
+	layout.Parent=list
+
+	local fly=Instance.new("TextButton")
+	fly.Name="FlyPlayerButton"
+	fly.Size=UDim2.new(1,-16,0,27)
+	fly.Position=UDim2.fromOffset(8,130)
+	fly.BackgroundColor3=Color3.fromRGB(0,145,60)
+	fly.BorderSizePixel=0
+	fly.Text="FLY PLAYER"
+	fly.TextColor3=Color3.fromRGB(230,255,235)
+	fly.TextSize=10
+	fly.Font=Enum.Font.GothamBold
+	fly.Parent=playerTpMain
+	corner(fly,5)
+
+	local selected=Instance.new("TextLabel")
+	selected.Size=UDim2.new(1,-16,0,18)
+	selected.Position=UDim2.fromOffset(8,161)
+	selected.BackgroundColor3=Color3.fromRGB(10,60,32)
+	selected.BorderSizePixel=0
+	selected.Text="Selected: None"
+	selected.TextColor3=Color3.fromRGB(170,255,190)
+	selected.TextSize=9
+	selected.Font=Enum.Font.GothamBold
+	selected.TextXAlignment=Enum.TextXAlignment.Center
+	selected.TextTruncate=Enum.TextTruncate.AtEnd
+	selected.Parent=playerTpMain
+	corner(selected,5)
+	local selectedStroke=Instance.new("UIStroke")
+	selectedStroke.Color=Color3.fromRGB(0,150,65)
+	selectedStroke.Thickness=1
+	selectedStroke.Transparency=.3
+	selectedStroke.Parent=selected
+
+	playerTpLogo=Instance.new("ImageButton")
+	playerTpLogo.Size=UDim2.fromOffset(50,50)
+	playerTpLogo.Position=UDim2.fromOffset(20,280)
+	playerTpLogo.BackgroundTransparency=1
+	playerTpLogo.BorderSizePixel=0
+	playerTpLogo.Image="rbxassetid://126155337074689"
+	playerTpLogo.ScaleType=Enum.ScaleType.Fit
+	playerTpLogo.Visible=false
+	playerTpLogo.Active=true
+	playerTpLogo.AutoButtonColor=false
+	playerTpLogo.Parent=playerTpGui
+	circle(playerTpLogo)
+
+	local function refresh()
+		for _,c in ipairs(list:GetChildren()) do
+			if c:IsA("TextButton") then c:Destroy() end
+		end
+		local q=string.lower(search.Text)
+		for _,p in ipairs(Players:GetPlayers()) do
+			if p~=Player then
+				local match=q==""
+					or string.find(string.lower(p.Name),q,1,true)
+					or string.find(string.lower(p.DisplayName),q,1,true)
+				if match then
+					local b=Instance.new("TextButton")
+					b.Size=UDim2.new(1,-4,0,22)
+					b.BackgroundColor3=Color3.fromRGB(12,55,28)
+					b.BorderSizePixel=0
+					b.Text=p.DisplayName.."  ("..p.Name..")"
+					b.TextColor3=Color3.fromRGB(210,255,220)
+					b.TextSize=9
+					b.Font=Enum.Font.Gotham
+					b.Parent=list
+					corner(b,4)
+					b.MouseButton1Click:Connect(function()
+						selectedTeleportPlayer=p
+						selected.Text="Selected: "..p.DisplayName
+						for _,o in ipairs(list:GetChildren()) do
+							if o:IsA("TextButton") then o.BackgroundColor3=Color3.fromRGB(12,55,28) end
+						end
+						b.BackgroundColor3=Color3.fromRGB(0,145,60)
+					end)
+				end
+			end
+		end
+		task.defer(function()
+			if list.Parent and layout.Parent then
+				list.CanvasSize=UDim2.new(0,0,0,layout.AbsoluteContentSize.Y+4)
+			end
+		end)
+	end
+
+	search:GetPropertyChangedSignal("Text"):Connect(refresh)
+	fly.MouseButton1Click:Connect(function()
+		if playerTpFlying then
+			stopPlayerFollow()
+			return
+		end
+		if not selectedTeleportPlayer then
+			selected.Text="Selected: Choose a player"
+			return
+		end
+		local char=Player.Character
+		local hum=char and char:FindFirstChildOfClass("Humanoid")
+		local root=char and char:FindFirstChild("HumanoidRootPart")
+		local targetChar=selectedTeleportPlayer.Character
+		local targetRoot=targetChar and targetChar:FindFirstChild("HumanoidRootPart")
+		if not hum or not root or not targetRoot then
+			selected.Text="Selected: Character unavailable"
+			return
+		end
+		playerTpSavedAutoRotate=hum.AutoRotate
+		hum.AutoRotate=false
+		playerTpFlying=true
+		fly.Text="FLY: ON"
+		fly.BackgroundColor3=Color3.fromRGB(0,200,80)
+		playerTpFlyConnection=RunService.RenderStepped:Connect(function()
+			if not playerTpFlying then return end
+			local target=selectedTeleportPlayer
+			local c=Player.Character
+			local h=c and c:FindFirstChildOfClass("Humanoid")
+			local r=c and c:FindFirstChild("HumanoidRootPart")
+			local tc=target and target.Character
+			local tr=tc and tc:FindFirstChild("HumanoidRootPart")
+			if not h or not r or not tr then
+				stopPlayerFollow()
+				return
+			end
+			h.AutoRotate=false
+			local pos=tr.Position-tr.CFrame.LookVector*1.6
+			r.CFrame=CFrame.lookAt(pos,tr.Position,Vector3.new(0,1,0))
+			r.AssemblyLinearVelocity=Vector3.zero
+			r.AssemblyAngularVelocity=Vector3.zero
+		end)
+	end)
+
+	min.MouseButton1Click:Connect(function()
+		playerTpMain.Visible=false
+		playerTpLogo.Visible=true
+	end)
+	playerTpLogo.MouseButton1Click:Connect(function()
+		playerTpMain.Visible=true
+		playerTpLogo.Visible=false
+	end)
+	x.MouseButton1Click:Connect(destroyTeleportPlayer)
+	Players.PlayerAdded:Connect(function()
+		task.wait(.2)
+		if playerTpGui and playerTpGui.Parent then refresh() end
+	end)
+	Players.PlayerRemoving:Connect(function(p)
+		if selectedTeleportPlayer==p then
+			stopPlayerFollow()
+			selectedTeleportPlayer=nil
+			selected.Text="Selected: None"
+		end
+		if playerTpGui and playerTpGui.Parent then refresh() end
+	end)
+	refresh()
+	drag(playerTpMain)
+	drag(playerTpLogo)
+end
+
+--==============================================================
+-- BC TAP TO TELEPORT
+--==============================================================
+
+local tool=nil
+local teleportTouchConnection=nil
+local teleportCharacterConnection=nil
+
+local function removeTeleportTool()
+	if teleportTouchConnection then
+		teleportTouchConnection:Disconnect()
+		teleportTouchConnection=nil
+	end
+
+	if teleportCharacterConnection then
+		teleportCharacterConnection:Disconnect()
+		teleportCharacterConnection=nil
+	end
+
+	if tool then
+		tool:Destroy()
+		tool=nil
+	end
+
+	local backpack=Player:FindFirstChildOfClass("Backpack")
+
+	if backpack then
+		local old=backpack:FindFirstChild("BC Tap To Teleport")
+
+		if old then
+			old:Destroy()
+		end
+	end
+
+	local character=Player.Character
+
+	if character then
+		local old=character:FindFirstChild("BC Tap To Teleport")
+
+		if old then
+			old:Destroy()
+		end
+	end
+end
+
+local function teleportToPosition(position)
+	local character=Player.Character
+	local root=character and character:FindFirstChild("HumanoidRootPart")
+
+	if not root then
+		return
+	end
+
+	root.CFrame=CFrame.new(
+		position+Vector3.new(0,2.5,0)
+	)
+
+	root.AssemblyLinearVelocity=Vector3.zero
+	root.AssemblyAngularVelocity=Vector3.zero
+end
+
+local function createTool()
+	local backpack=Player:WaitForChild("Backpack")
+
+	if tool and tool.Parent then
+		tool.Parent=backpack
+		return
+	end
+
+	local existing=backpack:FindFirstChild("BC Tap To Teleport")
+
+	if existing then
+		existing:Destroy()
+	end
+
+	local character=Player.Character
+
+	if character then
+		local old=character:FindFirstChild("BC Tap To Teleport")
+
+		if old then
+			old:Destroy()
+		end
+	end
+
+	tool=Instance.new("Tool")
+	tool.Name="BC Tap To Teleport"
+	tool.RequiresHandle=false
+	tool.CanBeDropped=false
+	tool.ManualActivationOnly=false
+	tool.ToolTip="Tap an object to teleport"
+	tool.Parent=backpack
+
+	local mouse=Player:GetMouse()
+	local lastTouchPosition=nil
+
+	teleportTouchConnection=UIS.TouchStarted:Connect(function(input,gameProcessed)
+		if gameProcessed then
+			return
+		end
+
+		if tool and tool.Parent==Player.Character and input then
+			lastTouchPosition=input.Position
+		end
+	end)
+
+	tool.Activated:Connect(function()
+		if not tool or tool.Parent~=Player.Character then
+			return
+		end
+
+		local targetPosition=nil
+
+		if lastTouchPosition then
+			local camera=Workspace.CurrentCamera
+
+			if camera then
+				local ray=camera:ViewportPointToRay(
+					lastTouchPosition.X,
+					lastTouchPosition.Y
+				)
+
+				local params=RaycastParams.new()
+				params.FilterType=Enum.RaycastFilterType.Exclude
+				params.FilterDescendantsInstances={Player.Character}
+
+				local result=Workspace:Raycast(
+					ray.Origin,
+					ray.Direction*1000,
+					params
+				)
+
+				if result then
+					targetPosition=result.Position
+				end
+			end
+		end
+
+		if not targetPosition and mouse then
+			local hit=mouse.Hit
+
+			if hit then
+				targetPosition=hit.Position
+			end
+		end
+
+		if targetPosition then
+			teleportToPosition(targetPosition)
+		end
+
+		lastTouchPosition=nil
+	end)
+
+	teleportCharacterConnection=Player.CharacterAdded:Connect(function(newCharacter)
+		task.wait(.25)
+
+		if tool and tool.Parent then
+			tool.Parent=Player:WaitForChild("Backpack")
+		end
+	end)
+end
+
+--==============================================================
+-- EMOTES R6
+--==============================================================
+
+local emoteGui
+local emoteMain
+local emoteLogo
+local emoteCurrentTrack=nil
+local emoteCurrentSpeed=1
+local emoteStatus=nil
+local emoteMinimized=false
+
+local EmoteAnimations={
+	["JERK 1"]="rbxassetid://148840371",
+	["JERK 2"]="rbxassetid://72042024",
+	["WAVE"]="rbxassetid://128777973",
+	["POINT"]="rbxassetid://128853357",
+	["CHEER"]="rbxassetid://129423030",
+	["LAUGH"]="rbxassetid://129423131"
+}
+
+local EmoteOrder={
+	"JERK 1",
+	"JERK 2",
+	"WAVE",
+	"POINT",
+	"CHEER",
+	"LAUGH"
+}
+
+local function stopEmote()
+	if emoteCurrentTrack then
+		pcall(function()
+			emoteCurrentTrack:Stop(0.1)
+			emoteCurrentTrack:Destroy()
+		end)
+
+		emoteCurrentTrack=nil
+
+		if emoteStatus then
+			emoteStatus.Text="STOPPED"
+		end
+	end
+end
+
+local function loadEmoteAnimation(animId)
+	local char=Player.Character
+
+	if not char then
+		return nil
+	end
+
+	local hum=char:FindFirstChildOfClass("Humanoid")
+
+	if not hum then
+		return nil
+	end
+
+	local animator=hum:FindFirstChildOfClass("Animator")
+
+	if not animator then
+		animator=Instance.new("Animator")
+		animator.Parent=hum
+	end
+
+	local anim=Instance.new("Animation")
+	anim.AnimationId=animId
+
+	local ok,track=pcall(function()
+		return animator:LoadAnimation(anim)
+	end)
+
+	anim:Destroy()
+
+	if not ok or not track then
+		return nil
+	end
+
+	track.Priority=Enum.AnimationPriority.Action
+	track.Looped=true
+
+	return track
+end
+
+local function playEmote(name,animId)
+	stopEmote()
+
+	local track=loadEmoteAnimation(animId)
+
+	if not track then
+		if emoteStatus then
+			emoteStatus.Text="FAILED TO LOAD"
+		end
+
+		return
+	end
+
+	emoteCurrentTrack=track
+
+	track:Play(0.1)
+	track:AdjustSpeed(emoteCurrentSpeed)
+
+	if emoteStatus then
+		emoteStatus.Text="PLAYING: "..name
+	end
+end
+
+local function destroyEmotes()
+	stopEmote()
+
+	if emoteGui then
+		emoteGui:Destroy()
+	end
+
+	emoteGui=nil
+	emoteMain=nil
+	emoteLogo=nil
+	emoteStatus=nil
+	emoteMinimized=false
+end
+
+local function createEmotes()
+	if emoteGui and emoteGui.Parent then
+		emoteMain.Visible=true
+		emoteLogo.Visible=false
+		emoteMinimized=false
+		return
+	end
+
+	emoteGui=Instance.new("ScreenGui")
+	emoteGui.Name="CheateringaddmnAnimUI"
+	emoteGui.ResetOnSpawn=false
+	emoteGui.IgnoreGuiInset=true
+	emoteGui.ZIndexBehavior=Enum.ZIndexBehavior.Sibling
+	emoteGui.DisplayOrder=150
+	emoteGui.Parent=PlayerGui
+
+	emoteMain=Instance.new("Frame")
+	emoteMain.Name="Main"
+	emoteMain.Size=UDim2.fromOffset(190,185)
+	emoteMain.Position=UDim2.new(.5,-95,.5,-92)
+	emoteMain.BackgroundColor3=Color3.fromRGB(8,35,18)
+	emoteMain.ClipsDescendants=true
+	emoteMain.Active=true
+	emoteMain.Parent=emoteGui
+	corner(emoteMain,8)
+
+	local mainStroke=Instance.new("UIStroke")
+	mainStroke.Color=Color3.fromRGB(0,200,70)
+	mainStroke.Thickness=1
+	mainStroke.Parent=emoteMain
+
+	--==========================================================
+	-- EMOTE TITLE BAR
+	--==========================================================
+
+	local titleBar=Instance.new("Frame")
+	titleBar.Name="TitleBar"
+	titleBar.Size=UDim2.new(1,0,0,26)
+	titleBar.BackgroundTransparency=1
+	titleBar.Parent=emoteMain
+
+	local dragHandle=Instance.new("Frame")
+	dragHandle.Name="DragHandle"
+	dragHandle.Size=UDim2.new(1,-52,1,0)
+	dragHandle.Position=UDim2.new(0,0,0,0)
+	dragHandle.BackgroundTransparency=1
+	dragHandle.Active=true
+	dragHandle.Selectable=false
+	dragHandle.ZIndex=10
+	dragHandle.Parent=titleBar
+
+	local title=Instance.new("TextLabel")
+	title.Name="Title"
+	title.Size=UDim2.new(1,-8,1,0)
+	title.Position=UDim2.new(0,4,0,0)
+	title.BackgroundTransparency=1
+	title.Text="By Cheateringaddmn"
+	title.TextColor3=Color3.fromRGB(100,255,130)
+	title.TextSize=11
+	title.Font=Enum.Font.GothamBold
+	title.TextXAlignment=Enum.TextXAlignment.Left
+	title.Active=false
+	title.Selectable=false
+	title.ZIndex=11
+	title.Parent=dragHandle
+
+	local minBtn=Instance.new("TextButton")
+	minBtn.Name="Minimize"
+	minBtn.Size=UDim2.new(0,22,0,22)
+	minBtn.Position=UDim2.new(1,-48,0,2)
+	minBtn.BackgroundColor3=Color3.fromRGB(0,80,40)
+	minBtn.Text="-"
+	minBtn.TextColor3=Color3.fromRGB(255,255,255)
+	minBtn.TextSize=14
+	minBtn.Font=Enum.Font.GothamBold
+	minBtn.AutoButtonColor=false
+	minBtn.Active=true
+	minBtn.Selectable=false
+	minBtn.ZIndex=20
+	minBtn.Parent=titleBar
+	circle(minBtn)
+
+	local closeBtn=Instance.new("TextButton")
+	closeBtn.Name="Close"
+	closeBtn.Size=UDim2.new(0,22,0,22)
+	closeBtn.Position=UDim2.new(1,-24,0,2)
+	closeBtn.BackgroundColor3=Color3.fromRGB(150,30,30)
+	closeBtn.Text="X"
+	closeBtn.TextColor3=Color3.fromRGB(255,255,255)
+	closeBtn.TextSize=12
+	closeBtn.Font=Enum.Font.GothamBold
+	closeBtn.AutoButtonColor=false
+	closeBtn.Active=true
+	closeBtn.Selectable=false
+	closeBtn.ZIndex=20
+	closeBtn.Parent=titleBar
+	circle(closeBtn)
+
+	--==========================================================
+	-- EMOTE LOGO
+	--==========================================================
+
+	emoteLogo=Instance.new("ImageButton")
+	emoteLogo.Name="LogoButton"
+	emoteLogo.Size=UDim2.fromOffset(50,50)
+	emoteLogo.Position=UDim2.new(.5,-25,.5,-25)
+	emoteLogo.BackgroundTransparency=1
+	emoteLogo.Image="rbxassetid://126155337074689"
+	emoteLogo.ScaleType=Enum.ScaleType.Fit
+	emoteLogo.AutoButtonColor=false
+	emoteLogo.Active=true
+	emoteLogo.Visible=false
+	emoteLogo.Parent=emoteGui
+	circle(emoteLogo)
+
+	--==========================================================
+	-- EMOTE CONTENT
+	--==========================================================
+
+	local content=Instance.new("Frame")
+	content.Name="Content"
+	content.Size=UDim2.new(1,0,1,-26)
+	content.Position=UDim2.new(0,0,0,26)
+	content.BackgroundTransparency=1
+	content.Parent=emoteMain
+
+	local animArea=Instance.new("ScrollingFrame")
+	animArea.Size=UDim2.new(1,-12,0,72)
+	animArea.Position=UDim2.new(0,6,0,3)
+	animArea.BackgroundColor3=Color3.fromRGB(0,48,8)
+	animArea.BorderSizePixel=0
+	animArea.ScrollBarThickness=3
+	animArea.ScrollBarImageColor3=Color3.fromRGB(0, 220, 70)
+	animArea.CanvasSize=UDim2.new(0,0,0,0)
+	animArea.AutomaticCanvasSize=Enum.AutomaticSize.Y
+	animArea.Parent=content
+	corner(animArea,5)
+
+	local pad=Instance.new("UIPadding")
+	pad.PaddingTop=UDim.new(0,3)
+	pad.PaddingBottom=UDim.new(0,3)
+	pad.PaddingLeft=UDim.new(0,3)
+	pad.PaddingRight=UDim.new(0,3)
+	pad.Parent=animArea
+
+	local layout=Instance.new("UIListLayout")
+	layout.Padding=UDim.new(0,3)
+	layout.HorizontalAlignment=Enum.HorizontalAlignment.Center
+	layout.SortOrder=Enum.SortOrder.LayoutOrder
+	layout.Parent=animArea
+
+	for index,name in ipairs(EmoteOrder) do
+		local id=EmoteAnimations[name]
+
+		local btn=Instance.new("TextButton")
+		btn.LayoutOrder=index
+		btn.Size=UDim2.new(1,-6,0,25)
+		btn.BackgroundColor3=Color3.fromRGB(0,145,60)
+		btn.Text=name
+		btn.TextColor3=Color3.fromRGB(235,255,240)
+		btn.TextSize=10
+		btn.Font=Enum.Font.GothamBold
+		btn.AutoButtonColor=false
+		btn.Parent=animArea
+		corner(btn,5)
+
+		btn.MouseButton1Click:Connect(function()
+			btn.BackgroundColor3=Color3.fromRGB(70,255,100)
+
+			playEmote(name,id)
+
+			task.delay(.1,function()
+				if btn.Parent then
+					btn.BackgroundColor3=Color3.fromRGB(0,145,60)
+				end
+			end)
+		end)
+	end
+
+	--==========================================================
+	-- SPEED
+	--==========================================================
+
+	local speedLabel=Instance.new("TextLabel")
+	speedLabel.Size=UDim2.new(0,45,0,22)
+	speedLabel.Position=UDim2.new(0,7,0,80)
+	speedLabel.BackgroundTransparency=1
+	speedLabel.Text="SPEED"
+	speedLabel.TextColor3=Color3.fromRGB(170,255,185)
+	speedLabel.TextSize=9
+	speedLabel.Font=Enum.Font.GothamBold
+	speedLabel.TextXAlignment=Enum.TextXAlignment.Left
+	speedLabel.Parent=content
+
+	local speedBox=Instance.new("TextBox")
+	speedBox.Size=UDim2.new(0,55,0,22)
+	speedBox.Position=UDim2.new(0,50,0,80)
+	speedBox.BackgroundColor3=Color3.fromRGB(0,48,8)
+	speedBox.Text="1"
+	speedBox.TextColor3=Color3.fromRGB(240,255,240)
+	speedBox.TextSize=9
+	speedBox.Font=Enum.Font.GothamBold
+	speedBox.ClearTextOnFocus=false
+	speedBox.Parent=content
+	corner(speedBox,5)
+
+	local speedStroke=Instance.new("UIStroke")
+	speedStroke.Color=Color3.fromRGB(0, 220, 70)
+	speedStroke.Thickness=1
+	speedStroke.Parent=speedBox
+
+	local applyBtn=Instance.new("TextButton")
+	applyBtn.Size=UDim2.new(0,68,0,22)
+	applyBtn.Position=UDim2.new(0,113,0,80)
+	applyBtn.BackgroundColor3=Color3.fromRGB(0,120,50)
+	applyBtn.Text="APPLY"
+	applyBtn.TextColor3=Color3.fromRGB(235,255,240)
+	applyBtn.TextSize=9
+	applyBtn.Font=Enum.Font.GothamBold
+	applyBtn.AutoButtonColor=false
+	applyBtn.Parent=content
+	corner(applyBtn,5)
+
+	applyBtn.MouseButton1Click:Connect(function()
+		local num=tonumber(speedBox.Text) or 1
+
+		num=math.clamp(
+			math.floor(num),
+			1,
+			100
+		)
+
+		emoteCurrentSpeed=num
+		speedBox.Text=tostring(num)
+
+		if emoteCurrentTrack then
+			pcall(function()
+				emoteCurrentTrack:AdjustSpeed(num)
+			end)
+		end
+
+		if emoteStatus then
+			emoteStatus.Text="SPEED: "..num
+		end
+
+		applyBtn.BackgroundColor3=Color3.fromRGB(70,255,100)
+
+		task.delay(.1,function()
+			if applyBtn.Parent then
+				applyBtn.BackgroundColor3=Color3.fromRGB(0,120,50)
+			end
+		end)
+	end)
+
+	--==========================================================
+	-- STOP
+	--==========================================================
+
+	local stopBtn=Instance.new("TextButton")
+	stopBtn.Size=UDim2.new(1,-12,0,25)
+	stopBtn.Position=UDim2.new(0,6,0,110)
+	stopBtn.BackgroundColor3=Color3.fromRGB(150,35,35)
+	stopBtn.Text="STOP"
+	stopBtn.TextColor3=Color3.fromRGB(255,240,240)
+	stopBtn.TextSize=10
+	stopBtn.Font=Enum.Font.GothamBold
+	stopBtn.AutoButtonColor=false
+	stopBtn.Parent=content
+	corner(stopBtn,5)
+
+	stopBtn.MouseButton1Click:Connect(function()
+		stopEmote()
+
+		stopBtn.BackgroundColor3=Color3.fromRGB(255,70,70)
+
+		task.delay(.1,function()
+			if stopBtn.Parent then
+				stopBtn.BackgroundColor3=Color3.fromRGB(150,35,35)
+			end
+		end)
+	end)
+
+	--==========================================================
+	-- STATUS
+	--==========================================================
+
+	emoteStatus=Instance.new("TextLabel")
+	emoteStatus.Size=UDim2.new(1,-12,0,16)
+	emoteStatus.Position=UDim2.new(0,6,0,140)
+	emoteStatus.BackgroundTransparency=1
+	emoteStatus.Text="READY"
+	emoteStatus.TextColor3=Color3.fromRGB(170,220,180)
+	emoteStatus.TextSize=8
+	emoteStatus.Font=Enum.Font.Gotham
+	emoteStatus.Parent=content
+
+	--==========================================================
+	-- DRAGGING
+	--==========================================================
+
+	local mainDragging=false
+	local mainDragInput=nil
+	local mainStartPos=nil
+	local mainStartInputPos=nil
+
+	dragHandle.InputBegan:Connect(function(input)
+		if input.UserInputType==Enum.UserInputType.MouseButton1
+			or input.UserInputType==Enum.UserInputType.Touch then
+
+			mainDragging=true
+			mainDragInput=input
+			mainStartPos=emoteMain.Position
+			mainStartInputPos=input.Position
+		end
+	end)
+
+	dragHandle.InputEnded:Connect(function(input)
+		if input==mainDragInput then
+			mainDragging=false
+			mainDragInput=nil
+		end
+	end)
+
+	UIS.InputChanged:Connect(function(input)
+		if not mainDragging then
+			return
+		end
+
+		if input~=mainDragInput then
+			return
+		end
+
+		local delta=input.Position-mainStartInputPos
+
+		emoteMain.Position=UDim2.new(
+			mainStartPos.X.Scale,
+			mainStartPos.X.Offset+delta.X,
+			mainStartPos.Y.Scale,
+			mainStartPos.Y.Offset+delta.Y
+		)
+	end)
+
+	--==========================================================
+	-- LOGO DRAGGING
+	--==========================================================
+
+	local logoDragging=false
+	local logoDragInput=nil
+	local logoStartPos=nil
+	local logoStartInputPos=nil
+
+	emoteLogo.InputBegan:Connect(function(input)
+		if input.UserInputType==Enum.UserInputType.MouseButton1
+			or input.UserInputType==Enum.UserInputType.Touch then
+
+			logoDragging=true
+			logoDragInput=input
+			logoStartPos=emoteLogo.Position
+			logoStartInputPos=input.Position
+		end
+	end)
+
+	emoteLogo.InputEnded:Connect(function(input)
+		if input==logoDragInput then
+			logoDragging=false
+			logoDragInput=nil
+		end
+	end)
+
+	UIS.InputChanged:Connect(function(input)
+		if not logoDragging then
+			return
+		end
+
+		if input~=logoDragInput then
+			return
+		end
+
+		local delta=input.Position-logoStartInputPos
+
+		emoteLogo.Position=UDim2.new(
+			logoStartPos.X.Scale,
+			logoStartPos.X.Offset+delta.X,
+			logoStartPos.Y.Scale,
+			logoStartPos.Y.Offset+delta.Y
+		)
+	end)
+
+	--==========================================================
+	-- MINIMIZE
+	--==========================================================
+
+	minBtn.MouseButton1Click:Connect(function()
+		emoteMinimized=true
+
+		local savedPosition=emoteMain.Position
+
+		emoteMain.Visible=false
+		emoteLogo.Visible=true
+		emoteLogo.Position=savedPosition
+	end)
+
+	--==========================================================
+	-- RESTORE
+	--==========================================================
+
+	emoteLogo.MouseButton1Click:Connect(function()
+		emoteMinimized=false
+
+		local savedPosition=emoteLogo.Position
+
+		emoteLogo.Visible=false
+		emoteMain.Visible=true
+		emoteMain.Position=savedPosition
+	end)
+
+	--==========================================================
+	-- CLOSE
+	--==========================================================
+
+	closeBtn.MouseButton1Click:Connect(function()
+		destroyEmotes()
+	end)
+
+	--==========================================================
+	-- STOP WHEN CHARACTER RESPAWNS
+	--==========================================================
+
+	Player.CharacterAdded:Connect(function()
+		stopEmote()
+	end)
+
+	emoteMain.Visible=true
+	emoteLogo.Visible=false
+	emoteMinimized=false
+end
+
+--==============================================================
+-- MAIN CONTROLS
+--==============================================================
+
+local feature="WalkSpeed"
+
+walkBtn.MouseButton1Click:Connect(function()
+	feature="WalkSpeed"
+
+	open.Text="OPEN WALK SPEED"
+	open.Visible=true
+	open2.Visible=false
+	openFly.Visible=false
+	openFlyVehicle.Visible=false
+	openFlyToPlayer.Visible=false
+	openCoord.Visible=false
+	openPlayer.Visible=false
+	openEmotesR6.Visible=false
+end)
+
+espBtn.MouseButton1Click:Connect(function()
+	feature="ESP"
+
+	open.Text="OPEN ESP PLAYER"
+	open.Visible=true
+	open2.Visible=false
+	openFly.Visible=false
+	openFlyVehicle.Visible=false
+	openFlyToPlayer.Visible=false
+	openCoord.Visible=false
+	openPlayer.Visible=false
+	openEmotesR6.Visible=false
+end)
+
+tpBtn.MouseButton1Click:Connect(function()
+	feature="Teleport"
+
+	open.Text="OPEN TAP TO TELEPORT"
+	open.Visible=true
+	open2.Visible=false
+	openFly.Visible=false
+	openFlyVehicle.Visible=false
+	openFlyToPlayer.Visible=false
+	openCoord.Visible=true
+	openPlayer.Visible=true
+	openEmotesR6.Visible=false
+end)
+
+infBtn.MouseButton1Click:Connect(function()
+	feature="InfJump"
+
+	open.Text="OPEN INF JUMP"
+	open.Visible=true
+	open2.Visible=false
+	openFly.Visible=false
+	openFlyVehicle.Visible=false
+	openFlyToPlayer.Visible=false
+	openCoord.Visible=false
+	openPlayer.Visible=false
+	openEmotesR6.Visible=false
+end)
+
+noclipBtn.MouseButton1Click:Connect(function()
+	feature="NoClip"
+
+	open.Visible=false
+	open2.Visible=true
+	openFly.Visible=false
+	openFlyVehicle.Visible=false
+	openFlyToPlayer.Visible=false
+	openCoord.Visible=false
+	openPlayer.Visible=false
+	openEmotesR6.Visible=false
+end)
+
+emoteBtn.MouseButton1Click:Connect(function()
+	feature="Emotes"
+
+	open.Visible=false
+	open2.Visible=false
+	openFly.Visible=false
+	openFlyVehicle.Visible=false
+	openFlyToPlayer.Visible=false
+	openCoord.Visible=false
+	openPlayer.Visible=false
+	openEmotesR6.Visible=true
+end)
+
+flyBtn.MouseButton1Click:Connect(function()
+	feature="Fly"
+
+	open.Visible=false
+	open2.Visible=false
+	openFly.Visible=true
+	openFlyVehicle.Visible=true
+	openFlyToPlayer.Visible=true
+	openCoord.Visible=false
+	openPlayer.Visible=false
+	openEmotesR6.Visible=false
+end)
+
+--==============================================================
+-- OPEN EMOTES R6
+-- THIS NOW AUTOMATICALLY OPENS THE MERGED EMOTES GUI
+--==============================================================
+
+openEmotesR6.MouseButton1Click:Connect(function()
+	flash(openEmotesR6)
+
+	createEmotes()
+end)
+
+local openingFlyGUI = false
+openFly.Activated:Connect(function()
+	if openingFlyGUI then return end
+	openingFlyGUI = true
+	flash(openFly)
+
+	local ok, err = pcall(function()
+		if type(createFly) ~= "function" then
+			error("Fly GUI function is not ready")
+		end
+		createFly()
+	end)
+
+	if not ok then
+		warn("[Cheateringaddmn] Failed to open Fly GUI: " .. tostring(err))
+	end
+
+	task.delay(0.25, function()
+		openingFlyGUI = false
+	end)
+end)
+
+local openingFlyToPlayerGUI = false
+openFlyToPlayer.Activated:Connect(function()
+	if openingFlyToPlayerGUI then return end
+	openingFlyToPlayerGUI = true
+	flash(openFlyToPlayer)
+
+	local ok, err = pcall(function()
+		if type(createFlyToPlayer) ~= "function" then
+			error("Fly To Player GUI function is not ready")
+		end
+		createFlyToPlayer()
+	end)
+
+	if not ok then
+		warn("[Cheateringaddmn] Failed to open Fly To Player GUI: " .. tostring(err))
+	end
+
+	task.delay(0.25, function()
+		openingFlyToPlayerGUI = false
+	end)
+end)
+
+local openingFlyVehicleGUI = false
+openFlyVehicle.Activated:Connect(function()
+	if openingFlyVehicleGUI then return end
+	openingFlyVehicleGUI = true
+	flash(openFlyVehicle)
+
+	local ok, err = pcall(function()
+		if type(createFlyVehicle) ~= "function" then
+			error("Fly Vehicle GUI function is not ready")
+		end
+		createFlyVehicle()
+	end)
+
+	if not ok then
+		warn("[Cheateringaddmn] Failed to open Fly Vehicle GUI: " .. tostring(err))
+	end
+
+	task.delay(0.25, function()
+		openingFlyVehicleGUI = false
+	end)
+end)
+
+--==============================================================
+-- OTHER OPEN BUTTONS
+--==============================================================
+
+open.MouseButton1Click:Connect(function()
+	flash(open)
+
+	if feature=="WalkSpeed" then
+
+		if not speedGui then
+			createSpeed()
+		else
+			speedMain.Visible=true
+			speedLogo.Visible=false
+		end
+
+	elseif feature=="ESP" then
+
+		createESP()
+
+	elseif feature=="Teleport" then
+
+		createTool()
+
+	elseif feature=="InfJump" then
+
+		createInf()
+	end
+end)
+
+open2.MouseButton1Click:Connect(function()
+	flash(open2)
+	createNoClip()
+end)
+
+openCoord.MouseButton1Click:Connect(function()
+	flash(openCoord)
+	createCoordinates()
+end)
+
+openPlayer.Activated:Connect(function()
+	flash(openPlayer)
+	if type(createFlyToPlayer) == "function" then
+		createFlyToPlayer()
+	end
+end)
+
+--==============================================================
+-- MAIN MINIMIZE / RESTORE
+--==============================================================
+
+minus.MouseButton1Click:Connect(function()
+	MainFrame.Visible=false
+	logo.Visible=true
+end)
+
+logo.MouseButton1Click:Connect(function()
+	MainFrame.Visible=true
+	logo.Visible=false
+end)
+
+drag(MainFrame)
+drag(logo)
+
+--==============================================================
+-- CLOSE EVERYTHING
+--==============================================================
+
+close.MouseButton1Click:Connect(function()
+
+	if destroyFly then
+		destroyFly()
+	end
+
+	destroySpeed()
+	destroyInf()
+	destroyNoClip()
+	destroyCoordinates()
+	destroyTeleportPlayer()
+	destroyEmotes()
+	removeTeleportTool()
+
+	if ScreenGui then
+		ScreenGui:Destroy()
+	end
+end)
+
+--==============================================================
+-- CHARACTER RESPAWN
+--==============================================================
+
+Player.CharacterAdded:Connect(function(c)
+
+	local h=c:WaitForChild("Humanoid",10)
+
+	if h then
+		h.WalkSpeed=savedSpeed
+
+		if jumpPower then
+			h.UseJumpPower=true
+			h.JumpPower=jumpPower
+		end
+	end
+
+	if tool then
+		task.wait(.2)
+		tool.Parent=Player.Backpack
+	end
+end)
+
+
+--==============================================================
+-- FLY GUI - CONNECTED TO OPEN FLY
+-- FULL 3D CAMERA FOLLOW + NOCLIP
+-- By Cheateringaddmn
+--==============================================================
+
+createFly = function()
+
+	-- If an existing Fly GUI is already open, restore/show it instead
+	-- of creating a duplicate.
+	if _G.CheateringaddmnFlyController then
+		local controller = _G.CheateringaddmnFlyController
+		if controller.Gui and controller.Gui.Parent then
+			if controller.Restore then
+				controller.Restore()
+			end
+			return
+		end
+		_G.CheateringaddmnFlyController = nil
+	end
+
+	local UserInputService = UIS
+	local FlyPlayer = Player
+
+	local SpeedNumber = 1
+	local STUDS_PER_SPEED = 20
+
+	local Flying = false
+	local Closed = false
+	local Minimized = false
+
+	local Character
+	local Humanoid
+	local RootPart
+
+	local FlyConnection
+	local NoclipConnection
+	local LinearVelocity
+	local Attachment
+	local AlignOrientation
+
+	local SavedWalkSpeed
+	local SavedJumpPower
+	local SavedAutoRotate
+	local SavedPlatformStand
+	local SavedUseJumpPower
+	local SavedCanCollide = {}
+
+	local ScreenGui
+	local Main
+	local FlyBtn
+	local SpeedBox
+	local ApplyBtn
+	local CloseBtn
+	local MinimizeBtn
+	local LogoRestoreBtn
+
+	local SavedPosition = UDim2.new(0.72, 0, 0.12, 0)
+	local CharacterConnection
+	local Controls
+
+	pcall(function()
+		local PlayerModule = FlyPlayer:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule")
+		local ControlsModule = require(PlayerModule)
+		Controls = ControlsModule:GetControls()
+	end)
+
+	local function LoadCharacter()
+		if Closed then return end
+		Character = FlyPlayer.Character or FlyPlayer.CharacterAdded:Wait()
+		Humanoid = Character:WaitForChild("Humanoid")
+		RootPart = Character:WaitForChild("HumanoidRootPart")
+	end
+
+	LoadCharacter()
+
+	local function SetNoclip(Enabled)
+		if not Character then return end
+
+		if Enabled then
+			table.clear(SavedCanCollide)
+
+			for _, Object in ipairs(Character:GetDescendants()) do
+				if Object:IsA("BasePart") then
+					SavedCanCollide[Object] = Object.CanCollide
+					Object.CanCollide = false
+				end
+			end
+
+			if NoclipConnection then
+				NoclipConnection:Disconnect()
+			end
+
+			NoclipConnection = RunService.Stepped:Connect(function()
+				if not Flying or not Character or not Character.Parent then
+					return
+				end
+
+				for _, Object in ipairs(Character:GetDescendants()) do
+					if Object:IsA("BasePart") then
+						Object.CanCollide = false
+					end
+				end
+			end)
+		else
+			if NoclipConnection then
+				NoclipConnection:Disconnect()
+				NoclipConnection = nil
+			end
+
+			for Object, OriginalValue in pairs(SavedCanCollide) do
+				if Object and Object.Parent and Object:IsA("BasePart") then
+					Object.CanCollide = OriginalValue
+				end
+			end
+
+			table.clear(SavedCanCollide)
+		end
+	end
+
+	local function StopFlying()
+		Flying = false
+		SetNoclip(false)
+
+		if FlyConnection then
+			FlyConnection:Disconnect()
+			FlyConnection = nil
+		end
+
+		if LinearVelocity then
+			LinearVelocity:Destroy()
+			LinearVelocity = nil
+		end
+
+		if AlignOrientation then
+			AlignOrientation:Destroy()
+			AlignOrientation = nil
+		end
+
+		if Attachment then
+			Attachment:Destroy()
+			Attachment = nil
+		end
+
+		if Humanoid and Humanoid.Parent then
+			Humanoid.WalkSpeed = SavedWalkSpeed or 16
+			Humanoid.JumpPower = SavedJumpPower or 50
+			Humanoid.AutoRotate = SavedAutoRotate ~= false
+			Humanoid.PlatformStand = SavedPlatformStand or false
+
+			if SavedUseJumpPower ~= nil then
+				Humanoid.UseJumpPower = SavedUseJumpPower
+			end
+
+			Humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+		end
+
+		if FlyBtn and FlyBtn.Parent then
+			FlyBtn.Text = "Fly"
+		end
+	end
+
+	local function CloseAll()
+		if Closed then return end
+
+		Closed = true
+		StopFlying()
+
+		if CharacterConnection then
+			CharacterConnection:Disconnect()
+			CharacterConnection = nil
+		end
+
+		if ScreenGui then
+			ScreenGui:Destroy()
+			ScreenGui = nil
+		end
+
+		if _G.CheateringaddmnFlyController then
+			_G.CheateringaddmnFlyController = nil
+		end
+
+		Main = nil
+		FlyBtn = nil
+		SpeedBox = nil
+		ApplyBtn = nil
+		CloseBtn = nil
+		MinimizeBtn = nil
+		LogoRestoreBtn = nil
+	end
+
+	local function MinimizeUI()
+		if Closed then return end
+
+		Minimized = true
+		SavedPosition = Main.Position
+
+		Main.Visible = false
+
+		LogoRestoreBtn.Visible = true
+		LogoRestoreBtn.Position = SavedPosition
+	end
+
+	local function RestoreUI()
+		if Closed then return end
+
+		Minimized = false
+		Main.Visible = true
+		Main.Position = SavedPosition
+
+		LogoRestoreBtn.Visible = false
+	end
+
+	local function StartFlying()
+		if Closed then return end
+
+		LoadCharacter()
+
+		if not Humanoid or not RootPart then
+			return
+		end
+
+		-- Save the character's actual settings before enabling flight.
+		-- Avoid StopFlying() here because it restores default values first.
+		SavedWalkSpeed = Humanoid.WalkSpeed
+		SavedJumpPower = Humanoid.JumpPower
+		SavedAutoRotate = Humanoid.AutoRotate
+		SavedPlatformStand = Humanoid.PlatformStand
+		SavedUseJumpPower = Humanoid.UseJumpPower
+
+		Flying = true
+		SetNoclip(true)
+
+		Humanoid.AutoRotate = false
+		Humanoid.PlatformStand = true
+		Humanoid.WalkSpeed = 0
+		Humanoid.JumpPower = 0
+
+		Humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+
+		if FlyBtn and FlyBtn.Parent then
+			FlyBtn.Text = "Unfly"
+		end
+
+		Attachment = Instance.new("Attachment")
+		Attachment.Name = "CheateringaddmnFlyAttachment"
+		Attachment.Parent = RootPart
+
+		LinearVelocity = Instance.new("LinearVelocity")
+		LinearVelocity.Name = "CheateringaddmnFlyVelocity"
+		LinearVelocity.Attachment0 = Attachment
+		LinearVelocity.RelativeTo = Enum.ActuatorRelativeTo.World
+		LinearVelocity.ForceLimitsEnabled = false
+		LinearVelocity.VectorVelocity = Vector3.zero
+		LinearVelocity.Parent = RootPart
+
+		AlignOrientation = Instance.new("AlignOrientation")
+		AlignOrientation.Attachment0 = Attachment
+		AlignOrientation.Mode = Enum.OrientationAlignmentMode.OneAttachment
+		AlignOrientation.RigidityEnabled = true
+		AlignOrientation.Responsiveness = 200
+		AlignOrientation.MaxTorque = math.huge
+		AlignOrientation.Parent = RootPart
+
+		FlyConnection = RunService.RenderStepped:Connect(function()
+			if Closed or not Flying then
+				return
+			end
+
+			if not Character
+				or not Character.Parent
+				or not Humanoid
+				or Humanoid.Health <= 0
+				or not RootPart
+				or not RootPart.Parent
+				or not LinearVelocity
+				or not AlignOrientation then
+
+				StopFlying()
+				return
+			end
+
+			if Humanoid:GetState() ~= Enum.HumanoidStateType.Physics then
+				Humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+			end
+
+			Humanoid.WalkSpeed = 0
+			Humanoid.JumpPower = 0
+
+			local Camera = workspace.CurrentCamera
+			if not Camera then
+				return
+			end
+
+			local CameraCF = Camera.CFrame
+			local CameraLook = CameraCF.LookVector
+			local CameraRight = CameraCF.RightVector
+			local ActualSpeed = SpeedNumber * STUDS_PER_SPEED
+
+			if CameraLook.Magnitude > 0.001 then
+				AlignOrientation.CFrame = CFrame.lookAt(
+					Vector3.zero,
+					CameraLook,
+					CameraCF.UpVector
+				)
+			end
+
+			local InputDirection = Vector3.zero
+
+			if Controls then
+				local Success, MoveVector = pcall(function()
+					return Controls:GetMoveVector()
+				end)
+
+				if Success and MoveVector then
+					InputDirection = MoveVector
+				end
+			else
+				InputDirection = Humanoid.MoveDirection
+			end
+
+			local FlyDirection = Vector3.zero
+
+			if InputDirection.Magnitude > 0.01 then
+				local FlatForward = Vector3.new(
+					CameraLook.X,
+					0,
+					CameraLook.Z
+				)
+
+				local FlatRight = Vector3.new(
+					CameraRight.X,
+					0,
+					CameraRight.Z
+				)
+
+				if FlatForward.Magnitude > 0.001 then
+					FlatForward = FlatForward.Unit
+				else
+					FlatForward = Vector3.new(0, 0, -1)
+				end
+
+				if FlatRight.Magnitude > 0.001 then
+					FlatRight = FlatRight.Unit
+				else
+					FlatRight = Vector3.new(1, 0, 0)
+				end
+
+				local ForwardAmount = -InputDirection.Z
+				local RightAmount = InputDirection.X
+
+				FlyDirection =
+					(CameraLook * ForwardAmount)
+					+ (FlatRight * RightAmount)
+			end
+
+			local KeyboardDirection = Vector3.zero
+
+			if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+				KeyboardDirection += CameraLook
+			end
+
+			if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+				KeyboardDirection -= CameraLook
+			end
+
+			if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+				KeyboardDirection -= CameraRight
+			end
+
+			if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+				KeyboardDirection += CameraRight
+			end
+
+			if KeyboardDirection.Magnitude > 0.01 then
+				FlyDirection = KeyboardDirection
+			end
+
+			local Vertical = 0
+
+			if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+				Vertical = 1
+			end
+
+			if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
+				Vertical = -1
+			end
+
+			if Vertical ~= 0 then
+				FlyDirection += Vector3.new(0, Vertical, 0)
+			end
+
+			if FlyDirection.Magnitude > 0.01 then
+				FlyDirection = FlyDirection.Unit * ActualSpeed
+			else
+				FlyDirection = Vector3.zero
+			end
+
+			LinearVelocity.VectorVelocity = FlyDirection
+		end)
+	end
+
+	ScreenGui = Instance.new("ScreenGui")
+	ScreenGui.Name = "CheateringaddmnFlyGUI"
+	ScreenGui.ResetOnSpawn = false
+	ScreenGui.IgnoreGuiInset = true
+	ScreenGui.Parent = FlyPlayer:WaitForChild("PlayerGui")
+
+	Main = Instance.new("Frame")
+	Main.Name = "MainUI"
+	Main.Size = UDim2.new(0, 220, 0, 115)
+	Main.Position = SavedPosition
+	Main.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+	Main.BorderSizePixel = 0
+	Main.Active = true -- allow the Fly panel background to receive drag input
+	Main.Parent = ScreenGui
+	corner(Main, 12)
+
+	local Credit = Instance.new("TextLabel")
+	Credit.BackgroundTransparency = 1
+	Credit.Text = "By Cheateringaddmn"
+	Credit.Font = Enum.Font.GothamBold
+	Credit.TextColor3 = Color3.fromRGB(255, 255, 255)
+	Credit.TextSize = 14
+	Credit.TextXAlignment = Enum.TextXAlignment.Left
+	Credit.Size = UDim2.new(0, 140, 0, 22)
+	Credit.Position = UDim2.new(0, 12, 0, 2)
+	Credit.Parent = Main
+
+	MinimizeBtn = Instance.new("TextButton")
+	MinimizeBtn.Size = UDim2.new(0, 18, 0, 18)
+	MinimizeBtn.Position = UDim2.new(0, 160, 0, 5)
+	MinimizeBtn.BackgroundColor3 = Color3.fromRGB(220, 50, 50)
+	MinimizeBtn.Text = "-"
+	MinimizeBtn.TextColor3 = Color3.new(1, 1, 1)
+	MinimizeBtn.Font = Enum.Font.GothamBold
+	MinimizeBtn.TextSize = 14
+	MinimizeBtn.BorderSizePixel = 0
+	MinimizeBtn.Parent = Main
+	circle(MinimizeBtn)
+
+	CloseBtn = Instance.new("TextButton")
+	CloseBtn.Size = UDim2.new(0, 18, 0, 18)
+	CloseBtn.Position = UDim2.new(0, 188, 0, 5)
+	CloseBtn.BackgroundColor3 = Color3.fromRGB(220, 50, 50)
+	CloseBtn.Text = "x"
+	CloseBtn.TextColor3 = Color3.new(1, 1, 1)
+	CloseBtn.Font = Enum.Font.GothamBold
+	CloseBtn.TextSize = 12
+	CloseBtn.BorderSizePixel = 0
+	CloseBtn.Parent = Main
+	circle(CloseBtn)
+
+	LogoRestoreBtn = Instance.new("ImageButton")
+	LogoRestoreBtn.Size = UDim2.new(0, 42, 0, 42)
+	LogoRestoreBtn.Position = SavedPosition
+	LogoRestoreBtn.BackgroundColor3 = Color3.fromRGB(220, 50, 50)
+	LogoRestoreBtn.Image = "rbxassetid://126155337074689"
+	LogoRestoreBtn.Visible = false
+	LogoRestoreBtn.BorderSizePixel = 0
+	LogoRestoreBtn.Parent = ScreenGui
+	circle(LogoRestoreBtn)
+
+	SpeedBox = Instance.new("TextBox")
+	SpeedBox.Size = UDim2.new(0, 200, 0, 30)
+	SpeedBox.Position = UDim2.new(0, 10, 0, 32)
+	SpeedBox.BackgroundColor3 = Color3.fromRGB(80, 255, 100)
+	SpeedBox.TextColor3 = Color3.fromRGB(20, 60, 20)
+	SpeedBox.Text = "1"
+	SpeedBox.PlaceholderText = "Speed"
+	SpeedBox.Font = Enum.Font.GothamBold
+	SpeedBox.TextSize = 14
+	SpeedBox.ClearTextOnFocus = false
+	SpeedBox.BorderSizePixel = 0
+	SpeedBox.Parent = Main
+	corner(SpeedBox, 8)
+
+	FlyBtn = Instance.new("TextButton")
+	FlyBtn.Size = UDim2.new(0, 95, 0, 30)
+	FlyBtn.Position = UDim2.new(0, 10, 0, 72)
+	FlyBtn.BackgroundColor3 = Color3.fromRGB(80, 255, 100)
+	FlyBtn.TextColor3 = Color3.fromRGB(20, 60, 20)
+	FlyBtn.Text = "Fly"
+	FlyBtn.Font = Enum.Font.GothamBold
+	FlyBtn.TextSize = 14
+	FlyBtn.BorderSizePixel = 0
+	FlyBtn.Parent = Main
+	corner(FlyBtn, 8)
+
+	ApplyBtn = Instance.new("TextButton")
+	ApplyBtn.Size = UDim2.new(0, 95, 0, 30)
+	ApplyBtn.Position = UDim2.new(0, 115, 0, 72)
+	ApplyBtn.BackgroundColor3 = Color3.fromRGB(80, 255, 100)
+	ApplyBtn.TextColor3 = Color3.fromRGB(20, 60, 20)
+	ApplyBtn.Text = "Apply"
+	ApplyBtn.Font = Enum.Font.GothamBold
+	ApplyBtn.TextSize = 14
+	ApplyBtn.BorderSizePixel = 0
+	ApplyBtn.Parent = Main
+	corner(ApplyBtn, 8)
+
+	FlyBtn.Activated:Connect(function()
+		if Closed then return end
+
+		if Flying then
+			StopFlying()
+		else
+			StartFlying()
+		end
+	end)
+
+	ApplyBtn.Activated:Connect(function()
+		if Closed then return end
+
+		local num = tonumber(SpeedBox.Text)
+
+		if num and num > 0 then
+			SpeedNumber = math.max(1, math.floor(num))
+			SpeedBox.Text = tostring(SpeedNumber)
+		end
+	end)
+
+	MinimizeBtn.Activated:Connect(MinimizeUI)
+	CloseBtn.Activated:Connect(CloseAll)
+	LogoRestoreBtn.Activated:Connect(RestoreUI)
+
+	CharacterConnection = FlyPlayer.CharacterAdded:Connect(function()
+		if Closed then return end
+
+		StopFlying()
+		task.wait(0.2)
+
+		if not Closed then
+			LoadCharacter()
+		end
+	end)
+
+	-- Mobile/touch + mouse drag, matching the Fly GUI's draggable behavior.
+	local function MakeDraggable(Target, Handle)
+		local Dragging = false
+		local DragStart
+		local StartPosition
+		local ActiveInput
+		local HasMoved = false
+
+		Handle = Handle or Target
+
+		Handle.InputBegan:Connect(function(Input)
+			if Closed then return end
+
+			if Input.UserInputType == Enum.UserInputType.MouseButton1
+				or Input.UserInputType == Enum.UserInputType.Touch then
+
+				Dragging = true
+				HasMoved = false
+				DragStart = Input.Position
+				StartPosition = Target.Position
+				ActiveInput = Input
+
+				Input.Changed:Connect(function()
+					if Input.UserInputState == Enum.UserInputState.End then
+						Dragging = false
+						ActiveInput = nil
+					end
+				end)
+			end
+		end)
+
+		UserInputService.InputChanged:Connect(function(Input)
+			if not Dragging or Closed then return end
+
+			if Input.UserInputType == Enum.UserInputType.MouseMovement
+				or Input.UserInputType == Enum.UserInputType.Touch then
+
+				local Delta = Input.Position - DragStart
+
+				if Delta.Magnitude > 8 then
+					HasMoved = true
+				end
+
+				Target.Position = UDim2.new(
+					StartPosition.X.Scale,
+					StartPosition.X.Offset + Delta.X,
+					StartPosition.Y.Scale,
+					StartPosition.Y.Offset + Delta.Y
+				)
+
+				SavedPosition = Target.Position
+			end
+		end)
+	end
+
+	MakeDraggable(Main, Main)
+	MakeDraggable(LogoRestoreBtn, LogoRestoreBtn)
+
+	_G.CheateringaddmnFlyController = {
+		Gui = ScreenGui,
+		Restore = RestoreUI,
+		Close = CloseAll
+	}
+
+	-- Bring the Fly GUI forward whenever it is opened.
+	ScreenGui.DisplayOrder = 200
+	Main.Visible = true
+	LogoRestoreBtn.Visible = false
+end
+
+destroyFly = function()
+	local controller = _G.CheateringaddmnFlyController
+
+	if controller and controller.Close then
+		pcall(controller.Close)
+	end
+
+	_G.CheateringaddmnFlyController = nil
+end
+
+
+--==============================================================
+-- FLY VEHICLE GUI - CONNECTED TO OPEN FLY VEHICLE
+-- 1 = 40 STUDS, 2 = 80 STUDS, 3 = 120 STUDS
+-- AUTO NOCLIP
+-- By Cheateringaddmn
+--==============================================================
+
+createFlyVehicle = function()
+	if _G.CheateringaddmnFlyVehicleController then
+		local existing = _G.CheateringaddmnFlyVehicleController
+		if existing.Gui and existing.Gui.Parent then
+			if existing.Restore then existing.Restore() end
+			return
+		end
+		_G.CheateringaddmnFlyVehicleController = nil
+	end
+
+	local UserInputService = UIS
+	local SpeedLevel = 1
+	local SpeedPerLevel = 40
+	local Flying = false
+	local Minimized = false
+	local GuiClosed = false
+
+	local FlyConnection
+	local NoclipConnection
+	local BodyVelocity
+	local BodyGyro
+	local OriginalCanCollide = {}
+	local InputChangedConnection
+	local InputEndedConnection
+	local CharacterAddedConnection
+
+	local Vehicle
+	local Seat
+	local Primary
+
+	local ScreenGui = Instance.new("ScreenGui")
+	ScreenGui.Name = "FlyVehicle"
+	ScreenGui.ResetOnSpawn = false
+	ScreenGui.IgnoreGuiInset = true
+	ScreenGui.DisplayOrder = 210
+	ScreenGui.Parent = PlayerGui
+
+	local MainFrame = Instance.new("Frame")
+	MainFrame.Name = "MainFrame"
+	MainFrame.Size = UDim2.new(0,220,0,132)
+	MainFrame.Position = UDim2.new(0.5,-110,0.5,-66)
+	MainFrame.BackgroundColor3 = Color3.fromRGB(10, 92, 35)
+	MainFrame.BorderSizePixel = 0
+	MainFrame.Active = true
+	MainFrame.Parent = ScreenGui
+	corner(MainFrame,18)
+
+	local MainScale = Instance.new("UIScale")
+	MainScale.Scale = 0.80
+	MainScale.Parent = MainFrame
+
+	local Title = Instance.new("TextLabel")
+	Title.Size = UDim2.new(0,125,0,28)
+	Title.Position = UDim2.new(0,12,0,5)
+	Title.BackgroundTransparency = 1
+	Title.Text = "By Cheateringaddmn"
+	Title.TextColor3 = Color3.fromRGB(255,255,255)
+	Title.TextSize = 12
+	Title.Font = Enum.Font.GothamBold
+	Title.TextXAlignment = Enum.TextXAlignment.Left
+	Title.Parent = MainFrame
+
+	local MinimizeButton = Instance.new("TextButton")
+	MinimizeButton.Size = UDim2.new(0,32,0,32)
+	MinimizeButton.Position = UDim2.new(1,-69,0,2)
+	MinimizeButton.BackgroundColor3 = Color3.fromRGB(225,55,55)
+	MinimizeButton.BorderSizePixel = 0
+	MinimizeButton.Text = ""
+	MinimizeButton.TextColor3 = Color3.fromRGB(255,255,255)
+	MinimizeButton.TextSize = 20
+	MinimizeButton.Font = Enum.Font.GothamBold
+	MinimizeButton.Parent = MainFrame
+	circle(MinimizeButton)
+
+	local CloseButton = Instance.new("TextButton")
+	CloseButton.Size = UDim2.new(0,32,0,32)
+	CloseButton.Position = UDim2.new(1,-34,0,2)
+	CloseButton.BackgroundColor3 = Color3.fromRGB(225,55,55)
+	CloseButton.BorderSizePixel = 0
+	CloseButton.Text = "X"
+	CloseButton.TextColor3 = Color3.fromRGB(255,255,255)
+	CloseButton.TextSize = 13
+	CloseButton.Font = Enum.Font.GothamBold
+	CloseButton.Parent = MainFrame
+	circle(CloseButton)
+
+	local SpeedBox = Instance.new("TextBox")
+	SpeedBox.Size = UDim2.new(1,-24,0,32)
+	SpeedBox.Position = UDim2.new(0,12,0,37)
+	SpeedBox.BackgroundColor3 = Color3.fromRGB(0,220,40)
+	SpeedBox.BorderSizePixel = 0
+	SpeedBox.Text = "1"
+	SpeedBox.TextColor3 = Color3.fromRGB(255,255,255)
+	SpeedBox.TextSize = 14
+	SpeedBox.Font = Enum.Font.GothamBold
+	SpeedBox.ClearTextOnFocus = false
+	SpeedBox.TextXAlignment = Enum.TextXAlignment.Center
+	SpeedBox.Parent = MainFrame
+	corner(SpeedBox,16)
+
+	local FlyButton = Instance.new("TextButton")
+	FlyButton.Size = UDim2.new(0,94,0,36)
+	FlyButton.Position = UDim2.new(0,9,0,80)
+	FlyButton.BackgroundColor3 = Color3.fromRGB(225,55,55)
+	FlyButton.BorderSizePixel = 0
+	FlyButton.Text = "FLY OFF"
+	FlyButton.TextColor3 = Color3.fromRGB(255,255,255)
+	FlyButton.TextSize = 12
+	FlyButton.Font = Enum.Font.GothamBold
+	FlyButton.Parent = MainFrame
+	corner(FlyButton,18)
+
+	local ApplyButton = Instance.new("TextButton")
+	ApplyButton.Size = UDim2.new(0,94,0,36)
+	ApplyButton.Position = UDim2.new(1,-103,0,80)
+	ApplyButton.BackgroundColor3 = Color3.fromRGB(0,220,40)
+	ApplyButton.BorderSizePixel = 0
+	ApplyButton.Text = "APPLY"
+	ApplyButton.TextColor3 = Color3.fromRGB(255,255,255)
+	ApplyButton.TextSize = 12
+	ApplyButton.Font = Enum.Font.GothamBold
+	ApplyButton.Parent = MainFrame
+	corner(ApplyButton,18)
+
+	local function GetFlySpeed()
+		return SpeedLevel * SpeedPerLevel
+	end
+
+	local function FindVehicle()
+		local Character = Player.Character
+		if not Character then return end
+		local Humanoid = Character:FindFirstChildOfClass("Humanoid")
+		if not Humanoid then return end
+		local CurrentSeat = Humanoid.SeatPart
+		if not CurrentSeat then return end
+		if not CurrentSeat:IsA("VehicleSeat") and not CurrentSeat:IsA("Seat") then
+			return
+		end
+		local CurrentVehicle = CurrentSeat:FindFirstAncestorOfClass("Model")
+		if not CurrentVehicle then return end
+		local CurrentPrimary = CurrentVehicle.PrimaryPart
+		if not CurrentPrimary then
+			CurrentPrimary = CurrentVehicle:FindFirstChildWhichIsA("BasePart")
+		end
+		if not CurrentPrimary then return end
+		return CurrentVehicle, CurrentSeat, CurrentPrimary
+	end
+
+	local function StopNoclip()
+		if NoclipConnection then
+			NoclipConnection:Disconnect()
+			NoclipConnection = nil
+		end
+		-- Restore each part to its original collision setting instead of forcing true.
+		for part, wasCollidable in pairs(OriginalCanCollide) do
+			if part and part.Parent then
+				part.CanCollide = wasCollidable
+			end
+			OriginalCanCollide[part] = nil
+		end
+	end
+
+	local function StartNoclip()
+		if NoclipConnection then NoclipConnection:Disconnect() end
+		NoclipConnection = RunService.Stepped:Connect(function()
+			if not Flying or not Vehicle or not Vehicle.Parent then return end
+			for _, Object in ipairs(Vehicle:GetDescendants()) do
+				if Object:IsA("BasePart") then
+					if OriginalCanCollide[Object] == nil then
+						OriginalCanCollide[Object] = Object.CanCollide
+					end
+					Object.CanCollide = false
+				end
+			end
+		end)
+	end
+
+	local function StopFly()
+		Flying = false
+		StopNoclip()
+		if FlyConnection then
+			FlyConnection:Disconnect()
+			FlyConnection = nil
+		end
+		if BodyVelocity then
+			BodyVelocity:Destroy()
+			BodyVelocity = nil
+		end
+		if BodyGyro then
+			BodyGyro:Destroy()
+			BodyGyro = nil
+		end
+		if Primary and Primary.Parent then
+			Primary.AssemblyLinearVelocity = Vector3.zero
+			Primary.AssemblyAngularVelocity = Vector3.zero
+		end
+		Vehicle, Seat, Primary = nil, nil, nil
+		if not GuiClosed and FlyButton and FlyButton.Parent then
+			FlyButton.Text = "FLY OFF"
+			FlyButton.BackgroundColor3 = Color3.fromRGB(225,55,55)
+		end
+	end
+
+	local function StartFly()
+		if GuiClosed then return end
+		local NewVehicle, NewSeat, NewPrimary = FindVehicle()
+		if not NewVehicle or not NewSeat or not NewPrimary then
+			warn("[Cheateringaddmn] Umupo muna sa suportadong sasakyan bago i-on ang Fly Vehicle.")
+			return
+		end
+
+		Vehicle, Seat, Primary = NewVehicle, NewSeat, NewPrimary
+		Flying = true
+		StartNoclip()
+
+		BodyVelocity = Instance.new("BodyVelocity")
+		BodyVelocity.Name = "FlyVehicleVelocity"
+		BodyVelocity.MaxForce = Vector3.new(math.huge,math.huge,math.huge)
+		BodyVelocity.P = 50000
+		BodyVelocity.Velocity = Vector3.zero
+		BodyVelocity.Parent = Primary
+
+		BodyGyro = Instance.new("BodyGyro")
+		BodyGyro.Name = "FlyVehicleGyro"
+		BodyGyro.MaxTorque = Vector3.new(math.huge,math.huge,math.huge)
+		BodyGyro.P = 50000
+		BodyGyro.D = 1000
+		BodyGyro.CFrame = Primary.CFrame
+		BodyGyro.Parent = Primary
+
+		FlyButton.Text = "FLY ON"
+		FlyButton.BackgroundColor3 = Color3.fromRGB(0,220,40)
+
+		FlyConnection = RunService.RenderStepped:Connect(function()
+			if not Flying or GuiClosed then return end
+			if not Vehicle or not Vehicle.Parent or not Primary or not Primary.Parent then
+				StopFly()
+				return
+			end
+			local Character = Player.Character
+			local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+			if not Humanoid or Humanoid.SeatPart ~= Seat then
+				StopFly()
+				return
+			end
+			local Camera = Workspace.CurrentCamera
+			if not Camera then return end
+
+			local forward = Camera.CFrame.LookVector
+			local right = Camera.CFrame.RightVector
+			local throttle, steer = 0, 0
+			if Seat:IsA("VehicleSeat") then
+				throttle = Seat.ThrottleFloat
+				steer = Seat.SteerFloat
+			else
+				local move = Humanoid.MoveDirection
+				local flatForward = Vector3.new(forward.X, 0, forward.Z)
+				local flatRight = Vector3.new(right.X, 0, right.Z)
+				if flatForward.Magnitude > 0.001 then flatForward = flatForward.Unit end
+				if flatRight.Magnitude > 0.001 then flatRight = flatRight.Unit end
+				if move.Magnitude > 0.01 then
+					if flatForward.Magnitude > 0.001 then
+						throttle = math.clamp(move:Dot(flatForward), -1, 1)
+					end
+					if flatRight.Magnitude > 0.001 then
+						steer = math.clamp(move:Dot(flatRight), -1, 1)
+					end
+				end
+			end
+
+			local movement = forward * throttle + right * steer
+			if movement.Magnitude > 0.01 then
+				BodyVelocity.Velocity = movement.Unit * GetFlySpeed()
+			else
+				BodyVelocity.Velocity = Vector3.zero
+			end
+
+			-- Use default look-at up handling to avoid degenerate camera up vectors.
+			BodyGyro.CFrame = CFrame.lookAt(
+				Primary.Position,
+				Primary.Position + forward
+			)
+		end)
+	end
+
+	FlyButton.Activated:Connect(function()
+		if GuiClosed then return end
+		if Flying then StopFly() else StartFly() end
+	end)
+
+	ApplyButton.Activated:Connect(function()
+		if GuiClosed then return end
+		local Level = tonumber(SpeedBox.Text)
+		if not Level then
+			SpeedBox.Text = tostring(SpeedLevel)
+			return
+		end
+		SpeedLevel = math.max(math.floor(Level),1)
+		SpeedBox.Text = tostring(SpeedLevel)
+	end)
+
+	MinimizeButton.Activated:Connect(function()
+		if GuiClosed then return end
+		Minimized = not Minimized
+		if Minimized then
+			MainFrame.Size = UDim2.new(0,220,0,48)
+			SpeedBox.Visible = false
+			FlyButton.Visible = false
+			ApplyButton.Visible = false
+			MinimizeButton.Text = "+"
+		else
+			MainFrame.Size = UDim2.new(0,220,0,132)
+			SpeedBox.Visible = true
+			FlyButton.Visible = true
+			ApplyButton.Visible = true
+			MinimizeButton.Text = ""
+		end
+	end)
+
+	local function CloseAll()
+		if GuiClosed then return end
+		GuiClosed = true
+		StopFly()
+		if InputChangedConnection then InputChangedConnection:Disconnect(); InputChangedConnection = nil end
+		if InputEndedConnection then InputEndedConnection:Disconnect(); InputEndedConnection = nil end
+		if CharacterAddedConnection then CharacterAddedConnection:Disconnect(); CharacterAddedConnection = nil end
+		if ScreenGui then ScreenGui:Destroy() end
+		_G.CheateringaddmnFlyVehicleController = nil
+	end
+
+	CloseButton.Activated:Connect(CloseAll)
+
+	local Dragging, DragInput, DragStart, StartPosition = false, nil, nil, nil
+	MainFrame.InputBegan:Connect(function(Input)
+		if GuiClosed then return end
+		if Input.UserInputType == Enum.UserInputType.MouseButton1
+			or Input.UserInputType == Enum.UserInputType.Touch then
+			Dragging = true
+			DragStart = Input.Position
+			StartPosition = MainFrame.Position
+		end
+	end)
+	MainFrame.InputChanged:Connect(function(Input)
+		if Input.UserInputType == Enum.UserInputType.MouseMovement
+			or Input.UserInputType == Enum.UserInputType.Touch then
+			DragInput = Input
+		end
+	end)
+	InputChangedConnection = UserInputService.InputChanged:Connect(function(Input)
+		if not Dragging or GuiClosed or not DragInput then return end
+		if Input.UserInputType == Enum.UserInputType.MouseMovement
+			or Input.UserInputType == Enum.UserInputType.Touch then
+				local Delta = Input.Position - DragStart
+				MainFrame.Position = UDim2.new(
+					StartPosition.X.Scale, StartPosition.X.Offset + Delta.X,
+					StartPosition.Y.Scale, StartPosition.Y.Offset + Delta.Y
+				)
+		end
+	end)
+	InputEndedConnection = UserInputService.InputEnded:Connect(function(Input)
+		if Input.UserInputType == Enum.UserInputType.MouseButton1
+			or Input.UserInputType == Enum.UserInputType.Touch then
+			Dragging = false
+			DragInput = nil
+		end
+	end)
+
+	CharacterAddedConnection = Player.CharacterAdded:Connect(function()
+		if not GuiClosed then StopFly() end
+	end)
+
+	_G.CheateringaddmnFlyVehicleController = {
+		Gui = ScreenGui,
+		Restore = function()
+			if ScreenGui and ScreenGui.Parent then
+				MainFrame.Visible = true
+			end
+		end,
+		Close = CloseAll
+	}
+	MainFrame.Visible = true
+end
+
+
+
+--==============================================================
+-- INITIAL STATE
+--==============================================================
+
+MainFrame.Visible=true
+logo.Visible=false
+
+print("CheateringaddmnUI loaded successfully")
