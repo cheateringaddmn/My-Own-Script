@@ -1,6 +1,6 @@
 -- GREEN MENU - REFERENCE NEON ANGULAR UI STYLE (no logo beside the header credit).
 --==============================================================
--- GREEN MENU UI - REFERENCE MATCHED VISUAL FIX (UI styling/layering only; sizes and callbacks preserved)
+-- GREEN MENU UI - REFERENCE STYLE UPDATE (UI styling only; existing sizes and callbacks preserved)
 -- SIZE: 520 x 325 (unchanged)
 -- MAIN LOGO: 65 x 65
 -- WALK SPEED / ESP / TELEPORT / INF JUMP / NO CLIP
@@ -114,7 +114,7 @@ ScreenGui.Parent = PlayerGui
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.fromOffset(520,325)
 MainFrame.Position = UDim2.new(.5,-260,.5,-162)
-MainFrame.BackgroundColor3 = Color3.fromRGB(0, 52, 22)
+MainFrame.BackgroundColor3 = Color3.fromRGB(0, 32, 15)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Parent = ScreenGui
@@ -122,7 +122,7 @@ corner(MainFrame, 4)
 
 local mainStroke = Instance.new("UIStroke")
 mainStroke.Color = Color3.fromRGB(0, 255, 75)
-mainStroke.Thickness = 3
+mainStroke.Thickness = 2.5
 mainStroke.Transparency = 0
 mainStroke.Parent = MainFrame
 
@@ -163,27 +163,25 @@ Workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(watchCurrentCamera)
 
 local bg = Instance.new("Frame")
 bg.Size = UDim2.fromScale(1,1)
-bg.BackgroundColor3 = Color3.fromRGB(0, 55, 24)
-bg.ZIndex = 1
+bg.BackgroundColor3 = Color3.fromRGB(0, 38, 18)
 bg.BorderSizePixel = 0
 bg.Parent = MainFrame
 corner(bg, 4)
 local bgGradient = Instance.new("UIGradient")
 bgGradient.Color = ColorSequence.new({
-	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 82, 35)),
-	ColorSequenceKeypoint.new(0.48, Color3.fromRGB(0, 58, 27)),
-	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 40, 20))
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 66, 29)),
+	ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 43, 21)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 28, 14))
 })
 bgGradient.Rotation = 0
 bgGradient.Parent = bg
 
 local menu = Instance.new("ScrollingFrame")
-menu.Size = UDim2.fromOffset(190,325)
-menu.BackgroundColor3 = Color3.fromRGB(0, 40, 20)
-menu.ZIndex = 3
+menu.Size = UDim2.fromOffset(200,325)
+menu.BackgroundColor3 = Color3.fromRGB(0, 30, 15)
 menu.BorderSizePixel = 0
 menu.ScrollBarThickness = 0
-menu.CanvasSize = UDim2.fromOffset(0,318)
+menu.CanvasSize = UDim2.fromOffset(0,325)
 menu.Parent = MainFrame
 menu.ClipsDescendants = true
 
@@ -194,8 +192,8 @@ menuGlow.Transparency = 0.05
 menuGlow.Parent = menu
 
 local border = Instance.new("Frame")
-border.Size = UDim2.fromOffset(6,325)
-border.Position = UDim2.fromOffset(184,0)
+border.Size = UDim2.fromOffset(4,325)
+border.Position = UDim2.fromOffset(198,0)
 border.BackgroundColor3 = Color3.fromRGB(0, 255, 75)
 border.BorderSizePixel = 0
 border.ZIndex = 5
@@ -347,10 +345,9 @@ logoStroke.Parent = logo
 local function menuButton(name,text,y,symbol)
 	local b = Instance.new("TextButton")
 	b.Name = name
-	b.Size = UDim2.fromOffset(184,35)
+	b.Size = UDim2.fromOffset(196,35)
 	b.Position = UDim2.fromOffset(0,y)
-	b.BackgroundColor3 = Color3.fromRGB(0, 38, 19)
-	b.ZIndex = 4
+	b.BackgroundColor3 = Color3.fromRGB(0, 29, 15)
 	b.BackgroundTransparency = 0.04
 	b.BorderSizePixel = 0
 	b.Text = ""
@@ -361,9 +358,9 @@ local function menuButton(name,text,y,symbol)
 
 	local buttonGradient = Instance.new("UIGradient")
 	buttonGradient.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 88, 36)),
-		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 52, 25)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 32, 16))
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 75, 32)),
+		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 45, 22)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 25, 13))
 	})
 	buttonGradient.Rotation = 0
 	buttonGradient.Parent = b
@@ -392,7 +389,7 @@ local function menuButton(name,text,y,symbol)
 	label.Position = UDim2.fromOffset(42, 0)
 	label.BackgroundTransparency = 1
 	label.Text = text
-	label.TextColor3 = Color3.fromRGB(250, 255, 252)
+	label.TextColor3 = Color3.fromRGB(255, 255, 255)
 	label.TextSize = 17
 	label.Font = Enum.Font.GothamBold
 	label.TextXAlignment = Enum.TextXAlignment.Left
@@ -444,13 +441,13 @@ local flyBtn = menuButton("Fly","FLY",248,"")
 menuButton("Others","OTHERS",283,"")
 
 local open = Instance.new("TextButton")
-open.Size = UDim2.fromOffset(270,60)
-open.Position = UDim2.fromOffset(220,55)
+open.Size = UDim2.fromOffset(270,50)
+open.Position = UDim2.fromOffset(220,70)
 open.BackgroundColor3 = Color3.fromRGB(0, 75, 27)
 open.BorderSizePixel = 0
 open.Text = "OPEN WALK SPEED"
-open.TextColor3 = Color3.fromRGB(255, 255, 255)
-open.TextSize = 24
+open.TextColor3 = Color3.fromRGB(245, 255, 248)
+open.TextSize = 19
 open.Font = Enum.Font.GothamBold
 open.AutoButtonColor = false
 open.ZIndex = 8
@@ -463,9 +460,9 @@ openStroke.Transparency = 0
 openStroke.Parent = open
 local openGradient = Instance.new("UIGradient")
 openGradient.Color = ColorSequence.new({
-	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 190, 62)),
-	ColorSequenceKeypoint.new(0.48, Color3.fromRGB(0, 105, 38)),
-	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 52, 25))
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 145, 48)),
+	ColorSequenceKeypoint.new(0.48, Color3.fromRGB(0, 78, 30)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 29, 15))
 })
 openGradient.Rotation = 90
 openGradient.Parent = open
@@ -480,7 +477,7 @@ open2.Parent = MainFrame
 local openFly = open:Clone()
 openFly.Name = "OpenFly"
 openFly.Text = "OPEN FLY"
-openFly.Visible = false
+openFly.Visible = true
 openFly.ZIndex = 8
 openFly.Parent = MainFrame
 
@@ -488,9 +485,9 @@ local openFlyVehicle = open:Clone()
 openFlyVehicle.Name = "OpenFlyVehicle"
 openFlyVehicle.Text = "OPEN FLY VEHICLE"
 openFlyVehicle.Size = UDim2.fromOffset(270,50)
-openFlyVehicle.Position = UDim2.fromOffset(220,122)
-openFlyVehicle.TextSize = 22
-openFlyVehicle.Visible = false
+openFlyVehicle.Position = UDim2.fromOffset(220,138)
+openFlyVehicle.TextSize = 19
+openFlyVehicle.Visible = true
 openFlyVehicle.ZIndex = 8
 openFlyVehicle.Parent = MainFrame
 
@@ -498,9 +495,9 @@ local openFlyToPlayer = open:Clone()
 openFlyToPlayer.Name = "OpenFlyToPlayer"
 openFlyToPlayer.Text = "OPEN FLY TO PLAYER"
 openFlyToPlayer.Size = UDim2.fromOffset(270,50)
-openFlyToPlayer.Position = UDim2.fromOffset(220,177)
-openFlyToPlayer.TextSize = 22
-openFlyToPlayer.Visible = false
+openFlyToPlayer.Position = UDim2.fromOffset(220,206)
+openFlyToPlayer.TextSize = 18
+openFlyToPlayer.Visible = true
 openFlyToPlayer.ZIndex = 8
 openFlyToPlayer.Parent = MainFrame
 
@@ -525,9 +522,9 @@ coordStroke.Thickness = 1.8
 coordStroke.Parent = openCoord
 local coordGradient = Instance.new("UIGradient")
 coordGradient.Color = ColorSequence.new({
-	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 190, 62)),
-	ColorSequenceKeypoint.new(0.48, Color3.fromRGB(0, 105, 38)),
-	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 52, 25))
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 145, 48)),
+	ColorSequenceKeypoint.new(0.48, Color3.fromRGB(0, 78, 30)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 29, 15))
 })
 coordGradient.Rotation = 90
 coordGradient.Parent = openCoord
@@ -561,9 +558,9 @@ emoteStroke.Thickness = 1.8
 emoteStroke.Parent = openEmotesR6
 local emoteGradient = Instance.new("UIGradient")
 emoteGradient.Color = ColorSequence.new({
-	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 190, 62)),
-	ColorSequenceKeypoint.new(0.48, Color3.fromRGB(0, 105, 38)),
-	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 52, 25))
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 145, 48)),
+	ColorSequenceKeypoint.new(0.48, Color3.fromRGB(0, 78, 30)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 29, 15))
 })
 emoteGradient.Rotation = 90
 emoteGradient.Parent = openEmotesR6
@@ -608,9 +605,8 @@ local openButtonsForBackground = {open, open2, openFly, openFlyVehicle, openFlyT
 for _, button in ipairs(openButtonsForBackground) do
     button.TextColor3 = Color3.fromRGB(245, 255, 250)
     button.TextTransparency = 0
-    button.TextStrokeColor3 = Color3.fromRGB(0, 85, 30)
-    button.TextStrokeTransparency = 0.92
-    button.ZIndex = 8
+    button.TextStrokeColor3 = Color3.fromRGB(0, 70, 24)
+    button.TextStrokeTransparency = 1
     button.BackgroundTransparency = 1
 
     local gradient = button:FindFirstChildOfClass("UIGradient")
@@ -622,7 +618,7 @@ for _, button in ipairs(openButtonsForBackground) do
     background.Size = button.Size
     background.Position = button.Position
     background.AnchorPoint = button.AnchorPoint
-    background.BackgroundColor3 = Color3.fromRGB(0, 155, 48)
+    background.BackgroundColor3 = Color3.fromRGB(0, 88, 31)
     background.BorderSizePixel = 0
     background.ZIndex = math.max(1, button.ZIndex - 1)
     background.Parent = button.Parent
@@ -633,9 +629,9 @@ for _, button in ipairs(openButtonsForBackground) do
     else
         local fallbackGradient = Instance.new("UIGradient")
         fallbackGradient.Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 210, 70)),
-            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 125, 42)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 65, 28))
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 180, 58)),
+            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 91, 34)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 44, 22))
         })
         fallbackGradient.Rotation = 90
         fallbackGradient.Parent = background
@@ -654,7 +650,7 @@ local function addOpenSideDesign(button)
         holder.Position = position
         holder.BackgroundTransparency = 1
         holder.BorderSizePixel = 0
-        holder.ZIndex = button.ZIndex + 1
+        holder.ZIndex = math.max(1, button.ZIndex - 1)
         holder.Parent = button
 
         for i = 0, 1 do
@@ -684,7 +680,7 @@ local function addOpenSideDesign(button)
         slash.Rotation = rotation
         slash.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
         slash.BorderSizePixel = 0
-        slash.ZIndex = button.ZIndex + 1
+        slash.ZIndex = math.max(1, button.ZIndex - 1)
         slash.Parent = button
         corner(slash, 1)
     end
