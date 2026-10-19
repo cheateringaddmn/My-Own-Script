@@ -1,6 +1,6 @@
 -- GREEN MENU - REFERENCE NEON ANGULAR UI STYLE (no logo beside the header credit).
 --==============================================================
--- GREEN MENU UI - REFERENCE STYLE UPDATE (UI styling only; existing sizes and callbacks preserved)
+-- GREEN MENU UI - REFERENCE MATCHED VISUAL FIX (UI styling/layering only; sizes and callbacks preserved)
 -- SIZE: 520 x 325 (unchanged)
 -- MAIN LOGO: 65 x 65
 -- WALK SPEED / ESP / TELEPORT / INF JUMP / NO CLIP
@@ -114,7 +114,7 @@ ScreenGui.Parent = PlayerGui
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.fromOffset(520,325)
 MainFrame.Position = UDim2.new(.5,-260,.5,-162)
-MainFrame.BackgroundColor3 = Color3.fromRGB(0, 88, 32)
+MainFrame.BackgroundColor3 = Color3.fromRGB(0, 52, 22)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Parent = ScreenGui
@@ -163,22 +163,24 @@ Workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(watchCurrentCamera)
 
 local bg = Instance.new("Frame")
 bg.Size = UDim2.fromScale(1,1)
-bg.BackgroundColor3 = Color3.fromRGB(0, 112, 35)
+bg.BackgroundColor3 = Color3.fromRGB(0, 55, 24)
+bg.ZIndex = 1
 bg.BorderSizePixel = 0
 bg.Parent = MainFrame
 corner(bg, 4)
 local bgGradient = Instance.new("UIGradient")
 bgGradient.Color = ColorSequence.new({
-	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 135, 48)),
-	ColorSequenceKeypoint.new(0.48, Color3.fromRGB(0, 95, 35)),
-	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 62, 25))
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 82, 35)),
+	ColorSequenceKeypoint.new(0.48, Color3.fromRGB(0, 58, 27)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 40, 20))
 })
 bgGradient.Rotation = 0
 bgGradient.Parent = bg
 
 local menu = Instance.new("ScrollingFrame")
 menu.Size = UDim2.fromOffset(190,325)
-menu.BackgroundColor3 = Color3.fromRGB(0, 55, 24)
+menu.BackgroundColor3 = Color3.fromRGB(0, 40, 20)
+menu.ZIndex = 3
 menu.BorderSizePixel = 0
 menu.ScrollBarThickness = 0
 menu.CanvasSize = UDim2.fromOffset(0,318)
@@ -208,9 +210,9 @@ top.ZIndex = 6
 top.Parent = MainFrame
 local topGradient = Instance.new("UIGradient")
 topGradient.Color = ColorSequence.new({
-	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 155, 52)),
-	ColorSequenceKeypoint.new(0.55, Color3.fromRGB(0, 85, 30)),
-	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 45, 18))
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 125, 45)),
+	ColorSequenceKeypoint.new(0.55, Color3.fromRGB(0, 67, 28)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 38, 18))
 })
 topGradient.Rotation = 0
 topGradient.Parent = top
@@ -289,12 +291,12 @@ credit.Position = UDim2.fromOffset(22,1)
 credit.BackgroundTransparency = 1
 credit.Text = "By Cheateringaddmn"
 credit.TextColor3 = Color3.fromRGB(255, 255, 255)
-credit.TextSize = 21
+credit.TextSize = 22
 credit.Font = Enum.Font.GothamBlack
 credit.FontFace = Font.new("rbxasset://fonts/families/Arial.json", Enum.FontWeight.Bold, Enum.FontStyle.Italic)
 credit.TextXAlignment = Enum.TextXAlignment.Left
-credit.TextStrokeColor3 = Color3.fromRGB(0, 45, 18)
-credit.TextStrokeTransparency = 0.55
+credit.TextStrokeColor3 = Color3.fromRGB(0, 55, 18)
+credit.TextStrokeTransparency = 0.35
 credit.ZIndex = 7
 credit.Parent = MainFrame
 
@@ -347,28 +349,29 @@ local function menuButton(name,text,y,symbol)
 	b.Name = name
 	b.Size = UDim2.fromOffset(184,35)
 	b.Position = UDim2.fromOffset(0,y)
-	b.BackgroundColor3 = Color3.fromRGB(0, 35, 17)
+	b.BackgroundColor3 = Color3.fromRGB(0, 38, 19)
+	b.ZIndex = 4
 	b.BackgroundTransparency = 0.04
 	b.BorderSizePixel = 0
 	b.Text = ""
 	b.AutoButtonColor = false
 	b.ClipsDescendants = true
 	b.Parent = menu
-	corner(b, 10)
+	corner(b, 6)
 
 	local buttonGradient = Instance.new("UIGradient")
 	buttonGradient.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 95, 38)),
-		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 65, 28)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 42, 20))
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 88, 36)),
+		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 52, 25)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 32, 16))
 	})
 	buttonGradient.Rotation = 0
 	buttonGradient.Parent = b
 
 	local buttonStroke = Instance.new("UIStroke")
 	buttonStroke.Color = Color3.fromRGB(0, 255, 75)
-	buttonStroke.Thickness = 1.1
-	buttonStroke.Transparency = 0
+	buttonStroke.Thickness = 1.35
+	buttonStroke.Transparency = 0.12
 	buttonStroke.Parent = b
 
 	-- Thin neon accent at the left edge; keeps the button clean, not blocky.
@@ -389,9 +392,9 @@ local function menuButton(name,text,y,symbol)
 	label.Position = UDim2.fromOffset(42, 0)
 	label.BackgroundTransparency = 1
 	label.Text = text
-	label.TextColor3 = Color3.fromRGB(255, 255, 255)
-	label.TextSize = 16
-	label.Font = Enum.Font.GothamMedium
+	label.TextColor3 = Color3.fromRGB(250, 255, 252)
+	label.TextSize = 17
+	label.Font = Enum.Font.GothamBold
 	label.TextXAlignment = Enum.TextXAlignment.Left
 	label.TextYAlignment = Enum.TextYAlignment.Center
 	label.TextTruncate = Enum.TextTruncate.AtEnd
@@ -414,6 +417,15 @@ local function menuButton(name,text,y,symbol)
 	iconLabel.ZIndex = 4
 	iconLabel.Parent = b
 
+	local separator = Instance.new("Frame")
+	separator.Name = "SeparatorLine"
+	separator.Size = UDim2.new(1, -14, 0, 1)
+	separator.Position = UDim2.new(0, 7, 1, -1)
+	separator.BackgroundColor3 = Color3.fromRGB(0, 125, 48)
+	separator.BackgroundTransparency = 0.22
+	separator.BorderSizePixel = 0
+	separator.ZIndex = 3
+	separator.Parent = b
 
 	b.MouseButton1Click:Connect(function()
 		flash(b)
@@ -437,13 +449,13 @@ open.Position = UDim2.fromOffset(220,55)
 open.BackgroundColor3 = Color3.fromRGB(0, 75, 27)
 open.BorderSizePixel = 0
 open.Text = "OPEN WALK SPEED"
-open.TextColor3 = Color3.fromRGB(155, 255, 190)
+open.TextColor3 = Color3.fromRGB(255, 255, 255)
 open.TextSize = 24
 open.Font = Enum.Font.GothamBold
 open.AutoButtonColor = false
 open.ZIndex = 8
 open.Parent = MainFrame
-corner(open, 5)
+corner(open, 4)
 local openStroke = Instance.new("UIStroke")
 openStroke.Color = Color3.fromRGB(0, 255, 80)
 openStroke.Thickness = 1.8
@@ -451,9 +463,9 @@ openStroke.Transparency = 0
 openStroke.Parent = open
 local openGradient = Instance.new("UIGradient")
 openGradient.Color = ColorSequence.new({
-	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 145, 48)),
-	ColorSequenceKeypoint.new(0.48, Color3.fromRGB(0, 78, 30)),
-	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 35, 17))
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 190, 62)),
+	ColorSequenceKeypoint.new(0.48, Color3.fromRGB(0, 105, 38)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 52, 25))
 })
 openGradient.Rotation = 90
 openGradient.Parent = open
@@ -498,7 +510,7 @@ openCoord.Position = UDim2.fromOffset(220,122)
 openCoord.BackgroundColor3 = Color3.fromRGB(0, 75, 27)
 openCoord.BorderSizePixel = 0
 openCoord.Text = "OPEN TELEPORT\nWITH COORDINATES"
-openCoord.TextColor3 = Color3.fromRGB(155, 255, 190)
+openCoord.TextColor3 = Color3.fromRGB(245, 255, 248)
 openCoord.TextSize = 24
 openCoord.Font = Enum.Font.Gotham
 openCoord.TextWrapped = true
@@ -506,16 +518,16 @@ openCoord.Visible = false
 openCoord.AutoButtonColor = false
 openCoord.ZIndex = 8
 openCoord.Parent = MainFrame
-corner(openCoord, 5)
+corner(openCoord, 4)
 local coordStroke = Instance.new("UIStroke")
 coordStroke.Color = Color3.fromRGB(0, 255, 80)
 coordStroke.Thickness = 1.8
 coordStroke.Parent = openCoord
 local coordGradient = Instance.new("UIGradient")
 coordGradient.Color = ColorSequence.new({
-	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 145, 48)),
-	ColorSequenceKeypoint.new(0.48, Color3.fromRGB(0, 78, 30)),
-	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 35, 17))
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 190, 62)),
+	ColorSequenceKeypoint.new(0.48, Color3.fromRGB(0, 105, 38)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 52, 25))
 })
 coordGradient.Rotation = 90
 coordGradient.Parent = openCoord
@@ -535,23 +547,23 @@ openEmotesR6.Position = UDim2.fromOffset(220,55)
 openEmotesR6.BackgroundColor3 = Color3.fromRGB(0, 75, 27)
 openEmotesR6.BorderSizePixel = 0
 openEmotesR6.Text = "OPEN EMOTES (R6)"
-openEmotesR6.TextColor3 = Color3.fromRGB(155, 255, 190)
+openEmotesR6.TextColor3 = Color3.fromRGB(245, 255, 248)
 openEmotesR6.TextSize = 24
 openEmotesR6.Font = Enum.Font.Gotham
 openEmotesR6.AutoButtonColor = false
 openEmotesR6.Visible = false
 openEmotesR6.ZIndex = 8
 openEmotesR6.Parent = MainFrame
-corner(openEmotesR6, 5)
+corner(openEmotesR6, 4)
 local emoteStroke = Instance.new("UIStroke")
 emoteStroke.Color = Color3.fromRGB(0, 255, 80)
 emoteStroke.Thickness = 1.8
 emoteStroke.Parent = openEmotesR6
 local emoteGradient = Instance.new("UIGradient")
 emoteGradient.Color = ColorSequence.new({
-	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 145, 48)),
-	ColorSequenceKeypoint.new(0.48, Color3.fromRGB(0, 78, 30)),
-	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 35, 17))
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 190, 62)),
+	ColorSequenceKeypoint.new(0.48, Color3.fromRGB(0, 105, 38)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 52, 25))
 })
 emoteGradient.Rotation = 90
 emoteGradient.Parent = openEmotesR6
@@ -596,8 +608,9 @@ local openButtonsForBackground = {open, open2, openFly, openFlyVehicle, openFlyT
 for _, button in ipairs(openButtonsForBackground) do
     button.TextColor3 = Color3.fromRGB(245, 255, 250)
     button.TextTransparency = 0
-    button.TextStrokeColor3 = Color3.fromRGB(0, 45, 18)
-    button.TextStrokeTransparency = 1
+    button.TextStrokeColor3 = Color3.fromRGB(0, 85, 30)
+    button.TextStrokeTransparency = 0.92
+    button.ZIndex = 8
     button.BackgroundTransparency = 1
 
     local gradient = button:FindFirstChildOfClass("UIGradient")
@@ -609,20 +622,20 @@ for _, button in ipairs(openButtonsForBackground) do
     background.Size = button.Size
     background.Position = button.Position
     background.AnchorPoint = button.AnchorPoint
-    background.BackgroundColor3 = Color3.fromRGB(0, 135, 48)
+    background.BackgroundColor3 = Color3.fromRGB(0, 155, 48)
     background.BorderSizePixel = 0
     background.ZIndex = math.max(1, button.ZIndex - 1)
     background.Parent = button.Parent
-    corner(background, 5)
+    corner(background, 4)
 
     if gradient then
         gradient.Parent = background
     else
         local fallbackGradient = Instance.new("UIGradient")
         fallbackGradient.Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 195, 65)),
-            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 115, 38)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 75, 27))
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 210, 70)),
+            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 125, 42)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 65, 28))
         })
         fallbackGradient.Rotation = 90
         fallbackGradient.Parent = background
@@ -641,7 +654,7 @@ local function addOpenSideDesign(button)
         holder.Position = position
         holder.BackgroundTransparency = 1
         holder.BorderSizePixel = 0
-        holder.ZIndex = math.max(1, button.ZIndex - 1)
+        holder.ZIndex = button.ZIndex + 1
         holder.Parent = button
 
         for i = 0, 1 do
@@ -671,7 +684,7 @@ local function addOpenSideDesign(button)
         slash.Rotation = rotation
         slash.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
         slash.BorderSizePixel = 0
-        slash.ZIndex = math.max(1, button.ZIndex - 1)
+        slash.ZIndex = button.ZIndex + 1
         slash.Parent = button
         corner(slash, 1)
     end
