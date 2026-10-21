@@ -1,7 +1,7 @@
--- GREEN MENU - REFERENCE NEON ANGULAR UI STYLE (no logo beside the header credit).
+-- GREEN MENU - REFERENCE NEON ANGULAR UI STYLE V3 (responsive reference sizing).
 --==============================================================
 -- GREEN MENU UI - REFERENCE STYLE UPDATE (UI styling only; existing sizes and callbacks preserved)
--- SIZE: 816 x 504 (proportions tuned to the supplied reference screenshot)
+-- BASE SIZE: 816 x 504; responsive scaling targets the supplied reference screenshot
 -- MAIN LOGO: 65 x 65
 -- WALK SPEED / ESP / TELEPORT / INF JUMP / NO CLIP
 -- EMOTES R6 ADDED
@@ -135,9 +135,13 @@ local function updateScale()
 
 	local v = cam.ViewportSize
 
+	-- Match the larger reference composition on wide screens while keeping
+	-- the complete panel inside shorter/mobile viewports.
+	local targetWidthScale = (v.X * 0.77) / 816
+	local targetHeightScale = (v.Y * 0.72) / 504
 	scale.Scale = math.max(
 		.55,
-		math.min(1,(v.X-10)/816,(v.Y-10)/504)
+		math.min(1.45, targetWidthScale, targetHeightScale)
 	)
 end
 
