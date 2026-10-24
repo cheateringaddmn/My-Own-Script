@@ -1,7 +1,7 @@
--- GREEN MENU - REFERENCE NEON ANGULAR UI STYLE V3 (responsive reference sizing).
+-- GREEN MENU UI - ORIGINAL CLASSIC GREEN STYLE.
 --==============================================================
--- GREEN MENU UI - REFERENCE STYLE UPDATE (UI styling only; existing sizes and callbacks preserved)
--- BASE SIZE: 816 x 504; responsive scaling targets the supplied reference screenshot
+-- GREEN MENU UI - NEW FILE COPY (existing features and callbacks preserved)
+-- ORIGINAL CLASSIC GREEN UI; original functions and OPEN handlers preserved
 -- MAIN LOGO: 65 x 65
 -- WALK SPEED / ESP / TELEPORT / INF JUMP / NO CLIP
 -- EMOTES R6 ADDED
@@ -114,15 +114,15 @@ ScreenGui.Parent = PlayerGui
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.fromOffset(816,504)
 MainFrame.Position = UDim2.new(.5,-408,.5,-252)
-MainFrame.BackgroundColor3 = Color3.fromRGB(0, 32, 15)
+MainFrame.BackgroundColor3 = Color3.fromRGB(0, 48, 8)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Parent = ScreenGui
 corner(MainFrame, 4)
 
 local mainStroke = Instance.new("UIStroke")
-mainStroke.Color = Color3.fromRGB(0, 255, 75)
-mainStroke.Thickness = 2.5
+mainStroke.Color = Color3.fromRGB(0, 190, 65)
+mainStroke.Thickness = 2
 mainStroke.Transparency = 0
 mainStroke.Parent = MainFrame
 
@@ -167,22 +167,22 @@ Workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(watchCurrentCamera)
 
 local bg = Instance.new("Frame")
 bg.Size = UDim2.fromScale(1,1)
-bg.BackgroundColor3 = Color3.fromRGB(0, 38, 18)
+bg.BackgroundColor3 = Color3.fromRGB(0, 48, 8)
 bg.BorderSizePixel = 0
 bg.Parent = MainFrame
 corner(bg, 4)
 local bgGradient = Instance.new("UIGradient")
 bgGradient.Color = ColorSequence.new({
-	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 58, 25)),
-	ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 35, 18)),
-	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 22, 12))
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 48, 8)),
+	ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 48, 8)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 48, 8))
 })
 bgGradient.Rotation = 0
 bgGradient.Parent = bg
 
 local menu = Instance.new("ScrollingFrame")
 menu.Size = UDim2.fromOffset(296,504)
-menu.BackgroundColor3 = Color3.fromRGB(0, 30, 15)
+menu.BackgroundColor3 = Color3.fromRGB(0, 35, 8)
 menu.BorderSizePixel = 0
 menu.ScrollBarThickness = 0
 menu.CanvasSize = UDim2.fromOffset(0,504)
@@ -191,14 +191,14 @@ menu.ClipsDescendants = true
 
 local menuGlow = Instance.new("UIStroke")
 menuGlow.Color = Color3.fromRGB(0, 190, 65)
-menuGlow.Thickness = 2.4
+menuGlow.Thickness = 1.5
 menuGlow.Transparency = 0.05
 menuGlow.Parent = menu
 
 local border = Instance.new("Frame")
 border.Size = UDim2.fromOffset(4,504)
-border.Position = UDim2.fromOffset(294,0)
-border.BackgroundColor3 = Color3.fromRGB(0, 255, 75)
+border.Position = UDim2.fromOffset(294,68)
+border.BackgroundColor3 = Color3.fromRGB(0, 190, 65)
 border.BorderSizePixel = 0
 border.ZIndex = 5
 border.Parent = MainFrame
@@ -212,9 +212,9 @@ top.ZIndex = 6
 top.Parent = MainFrame
 local topGradient = Instance.new("UIGradient")
 topGradient.Color = ColorSequence.new({
-	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 125, 45)),
-	ColorSequenceKeypoint.new(0.55, Color3.fromRGB(0, 67, 28)),
-	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 38, 18))
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 180, 65)),
+	ColorSequenceKeypoint.new(0.55, Color3.fromRGB(0, 180, 65)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 180, 65))
 })
 topGradient.Rotation = 0
 topGradient.Parent = top
@@ -222,7 +222,7 @@ local topAccent = Instance.new("Frame")
 topAccent.Name = "TopAccentLine"
 topAccent.Size = UDim2.new(1, 0, 0, 2)
 topAccent.Position = UDim2.new(0, 0, 1, -2)
-topAccent.BackgroundColor3 = Color3.fromRGB(115, 255, 160)
+topAccent.BackgroundColor3 = Color3.fromRGB(0, 190, 65)
 topAccent.BorderSizePixel = 0
 topAccent.ZIndex = 7
 topAccent.Parent = top
@@ -242,7 +242,7 @@ for i = 0, 2 do
     slash.Size = UDim2.fromOffset(12, 40)
     slash.Position = UDim2.fromOffset(i * 26, 0)
     slash.Rotation = 35
-    slash.BackgroundColor3 = Color3.fromRGB(0, 255, 95)
+    slash.BackgroundColor3 = Color3.fromRGB(0, 190, 65)
     slash.BorderSizePixel = 0
     slash.ZIndex = 8
     slash.Parent = headerSlashes
@@ -256,7 +256,7 @@ local function addCornerTrim(name, pos, rotation)
     trim.Size = UDim2.fromOffset(25, 4)
     trim.Position = pos
     trim.Rotation = rotation
-    trim.BackgroundColor3 = Color3.fromRGB(0, 255, 90)
+    trim.BackgroundColor3 = Color3.fromRGB(0, 190, 65)
     trim.BorderSizePixel = 0
     trim.ZIndex = 9
     trim.Parent = MainFrame
@@ -271,7 +271,7 @@ local titleAccent = Instance.new("Frame")
 titleAccent.Name = "TitleAccent"
 titleAccent.Size = UDim2.fromOffset(100, 4)
 titleAccent.Position = UDim2.fromOffset(10, 52)
-titleAccent.BackgroundColor3 = Color3.fromRGB(80, 255, 125)
+titleAccent.BackgroundColor3 = Color3.fromRGB(0, 190, 65)
 titleAccent.BorderSizePixel = 0
 titleAccent.ZIndex = 8
 titleAccent.Parent = top
@@ -287,15 +287,25 @@ titleAccent2.ZIndex = 8
 titleAccent2.Parent = top
 corner(titleAccent2, 2)
 
+local mainLogo = Instance.new("ImageLabel")
+mainLogo.Name = "MainLogo"
+mainLogo.Size = UDim2.fromOffset(65,65)
+mainLogo.Position = UDim2.fromOffset(6,1)
+mainLogo.BackgroundTransparency = 1
+mainLogo.Image = "rbxassetid://126155337074689"
+mainLogo.ScaleType = Enum.ScaleType.Fit
+mainLogo.ZIndex = 8
+mainLogo.Parent = top
+
 local credit = Instance.new("TextLabel")
-credit.Size = UDim2.fromOffset(500,68)
-credit.Position = UDim2.fromOffset(38,4)
+credit.Size = UDim2.fromOffset(400,68)
+credit.Position = UDim2.fromOffset(78,4)
 credit.BackgroundTransparency = 1
 credit.Text = "By Cheateringaddmn"
 credit.TextColor3 = Color3.fromRGB(255, 255, 255)
-credit.TextSize = 30
-credit.Font = Enum.Font.GothamBlack
-credit.FontFace = Font.new("rbxasset://fonts/families/Arial.json", Enum.FontWeight.Bold, Enum.FontStyle.Italic)
+credit.TextSize = 26
+credit.Font = Enum.Font.GothamBold
+credit.FontFace = Font.new("rbxasset://fonts/families/Arial.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
 credit.TextXAlignment = Enum.TextXAlignment.Left
 credit.TextStrokeColor3 = Color3.fromRGB(0, 55, 18)
 credit.TextStrokeTransparency = 0.35
@@ -305,7 +315,7 @@ credit.Parent = MainFrame
 local minus = Instance.new("TextButton")
 minus.Size = UDim2.fromOffset(50,50)
 minus.Position = UDim2.new(1,-145,0,14)
-minus.BackgroundColor3 = Color3.fromRGB(245,0,0)
+minus.BackgroundColor3 = Color3.fromRGB(220, 50, 50)
 minus.Text = "-"
 minus.TextColor3 = Color3.new(1,1,1)
 minus.TextSize = 34
@@ -317,7 +327,7 @@ circle(minus)
 local close = Instance.new("TextButton")
 close.Size = UDim2.fromOffset(50,50)
 close.Position = UDim2.new(1,-65,0,14)
-close.BackgroundColor3 = Color3.fromRGB(245,0,0)
+close.BackgroundColor3 = Color3.fromRGB(220, 50, 50)
 close.Text = "X"
 close.TextColor3 = Color3.new(1,1,1)
 close.TextSize = 30
@@ -351,82 +361,37 @@ local function menuButton(name,text,y,symbol)
 	b.Name = name
 	b.Size = UDim2.fromOffset(286,47)
 	b.Position = UDim2.fromOffset(0,y)
-	b.BackgroundColor3 = Color3.fromRGB(0, 35, 17)
-	b.BackgroundTransparency = 0.04
+	b.BackgroundColor3 = Color3.fromRGB(0, 43, 9)
+	b.BackgroundTransparency = 0
 	b.BorderSizePixel = 0
 	b.Text = ""
 	b.AutoButtonColor = false
 	b.ClipsDescendants = true
 	b.Parent = menu
-	corner(b, 6)
 
-	local buttonGradient = Instance.new("UIGradient")
-	buttonGradient.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 75, 32)),
-		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 45, 22)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 25, 13))
-	})
-	buttonGradient.Rotation = 0
-	buttonGradient.Parent = b
-
-	local buttonStroke = Instance.new("UIStroke")
-	buttonStroke.Color = Color3.fromRGB(0, 255, 75)
-	buttonStroke.Thickness = 1.35
-	buttonStroke.Transparency = 0.12
-	buttonStroke.Parent = b
-
-	-- Thin neon accent at the left edge; keeps the button clean, not blocky.
-	local accent = Instance.new("Frame")
-	accent.Name = "SketchAccent"
-	accent.Size = UDim2.fromOffset(6, 30)
-	accent.Position = UDim2.new(0, 10, 0.5, -15)
-	accent.BackgroundColor3 = Color3.fromRGB(0, 255, 70)
-	accent.BorderSizePixel = 0
-	accent.ZIndex = 3
-	accent.Parent = b
-	corner(accent, 2)
-
-	-- Keep the left navigation rows clean: no extra symbol on their RIGHT edge.
-	local label = Instance.new("TextLabel")
-	label.Name = "MenuText"
-	label.Size = UDim2.new(1, -60, 1, 0)
-	label.Position = UDim2.fromOffset(60, 0)
-	label.BackgroundTransparency = 1
-	label.Text = text
-	label.TextColor3 = Color3.fromRGB(255, 255, 255)
-	label.TextSize = 20
-	label.Font = Enum.Font.GothamBold
-	label.TextXAlignment = Enum.TextXAlignment.Left
-	label.TextYAlignment = Enum.TextYAlignment.Center
-	label.TextTruncate = Enum.TextTruncate.AtEnd
-	label.ZIndex = 4
-	label.Parent = b
-
-	local iconLabel = Instance.new("TextLabel")
-	iconLabel.Name = "MenuIcon"
-	iconLabel.Size = UDim2.fromOffset(44, 42)
-	iconLabel.Position = UDim2.fromOffset(8, 1)
-	iconLabel.BackgroundTransparency = 1
-	iconLabel.Text = ""
-	iconLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-	iconLabel.TextStrokeColor3 = Color3.fromRGB(255, 255, 255)
-	iconLabel.TextStrokeTransparency = 1
-	iconLabel.TextSize = 26
-	iconLabel.Font = Enum.Font.GothamBold
-	iconLabel.TextXAlignment = Enum.TextXAlignment.Center
-	iconLabel.TextYAlignment = Enum.TextYAlignment.Center
-	iconLabel.ZIndex = 4
-	iconLabel.Parent = b
-
+	-- Classic flat rows like the original Green UI screenshot.
 	local separator = Instance.new("Frame")
-	separator.Name = "SeparatorLine"
-	separator.Size = UDim2.new(1, -20, 0, 1)
-	separator.Position = UDim2.new(0, 10, 1, -1)
-	separator.BackgroundColor3 = Color3.fromRGB(0, 125, 48)
-	separator.BackgroundTransparency = 0.22
+	separator.Name = "RowSeparator"
+	separator.Size = UDim2.new(1, -18, 0, 2)
+	separator.Position = UDim2.new(0, 18, 1, -2)
+	separator.BackgroundColor3 = Color3.fromRGB(0, 92, 25)
 	separator.BorderSizePixel = 0
 	separator.ZIndex = 3
 	separator.Parent = b
+
+	local label = Instance.new("TextLabel")
+	label.Name = "MenuText"
+	label.Size = UDim2.new(1, -20, 1, 0)
+	label.Position = UDim2.fromOffset(18, 0)
+	label.BackgroundTransparency = 1
+	label.Text = text
+	label.TextColor3 = Color3.fromRGB(35, 205, 65)
+	label.TextSize = 24
+	label.Font = Enum.Font.Gotham
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.TextYAlignment = Enum.TextYAlignment.Center
+	label.ZIndex = 4
+	label.Parent = b
 
 	b.MouseButton1Click:Connect(function()
 		flash(b)
@@ -434,7 +399,6 @@ local function menuButton(name,text,y,symbol)
 
 	return b
 end
-
 local walkBtn = menuButton("WalkSpeed","WALK SPEED",80,"")
 local espBtn = menuButton("ESPPlayer","ESP PLAYER",131,"")
 local tpBtn = menuButton("Teleport","TELEPORT",182,"")
@@ -902,7 +866,7 @@ local function createInf()
 	local m=Instance.new("TextButton")
 	m.Size=UDim2.fromOffset(28,28)
 	m.Position=UDim2.new(1,-62,0,-14)
-	m.BackgroundColor3=Color3.fromRGB(245,0,0)
+	m.BackgroundColor3=Color3.fromRGB(220, 50, 50)
 	m.Text=""
 	m.TextColor3=Color3.new(1,1,1)
 	m.TextSize=19
